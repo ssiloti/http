@@ -10,10 +10,9 @@
 #ifndef HTTP_HEADERS_CONTENT_LENGTH_HPP
 #define HTTP_HEADERS_CONTENT_LENGTH_HPP
 
-#include <boost/spirit/home/qi/parse.hpp>
-#include <boost/spirit/home/qi/numeric/uint.hpp>
-#include <boost/spirit/home/karma/generate.hpp>
-#include <boost/spirit/home/karma/numeric/uint.hpp>
+#include <boost/spirit/include/qi_parse_auto.hpp>
+#include <boost/spirit/include/karma_generate_auto.hpp>
+#include <boost/spirit/home/karma/numeric.hpp>
 
 #include <boost/fusion/support/pair.hpp>
 #include <boost/mpl/string.hpp>
@@ -35,13 +34,13 @@ public:
 	template <typename InputIterator>
 	void parse(InputIterator begin, InputIterator end)
 	{
-		boost::spirit::qi::parse(begin, end, boost::spirit::qi::uint_, length_);
+		boost::spirit::qi::parse(begin, end, length_);
 	}
 
 	template <typename OutputIterator>
 	void serialize(OutputIterator sink)
 	{
-		boost::spirit::karma::generate(sink, boost::spirit::karma::uint_, length_);
+		boost::spirit::karma::generate(sink, length_);
 	}
 
 	void reset()
