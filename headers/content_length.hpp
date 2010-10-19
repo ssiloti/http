@@ -18,9 +18,6 @@
 #include <boost/fusion/support/pair.hpp>
 #include <boost/mpl/string.hpp>
 
-#include <string>
-#include <iterator>
-
 namespace http {
 namespace headers {
 
@@ -35,20 +32,16 @@ public:
 		: length_(length)
 	{}
 
-	void parse(const std::string& value)
+	template <typename InputIterator>
+	void parse(InputIterator begin, InputIterator end)
 	{
-		std::string::const_iterator begin(value.begin());
-		boost::spirit::qi::parse(begin, value.end(), boost::spirit::qi::uint_, length_);
+		boost::spirit::qi::parse(begin, end, boost::spirit::qi::uint_, length_);
 	}
 
-	std::vector<std::string> serialize()
+	template <typename OutputIterator>
+	void serialize(OutputIterator sink)
 	{
-		std::string value;
-		std::back_insert_iterator<std::string> sink(value);
-
 		boost::spirit::karma::generate(sink, boost::spirit::karma::uint_, length_);
-
-		return std::vector<std::string>(1, value);
 	}
 
 	void reset()

@@ -16,15 +16,23 @@
 namespace http {
 namespace detail {
 
+template <typename OutputIterator>
 struct serialize_known_header
 {
-	typedef std::vector<std::string> result_type;
+	typedef OutputIterator iterator;
+	typedef void result_type;
+
+	serialize_known_header(iterator sink)
+		: sink_(sink)
+	{}
 
 	template <typename Header>
 	result_type operator()(Header header) const
 	{
-		return header.second.serialize();
+		header.second.serialize(sink_);
 	}
+
+	iterator sink_;
 };
 
 }

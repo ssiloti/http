@@ -16,23 +16,27 @@
 namespace http {
 namespace detail {
 
+template <typename InputIterator>
 struct parse_known_header
 {
+	typedef InputIterator iterator;
+
 	// Add we really need is a bool that default constructs to false.
 	// I used boost::tribool beause I'm lazy.
 	typedef boost::tribool result_type;
 
-	parse_known_header(std::string value)
-		: value_(value) {}
+	parse_known_header(iterator begin, iterator end)
+		: begin_(begin), end_(end)
+	{}
 
 	template <typename Header>
 	result_type operator()(Header header) const
 	{
-		header.second.parse(value_);
+		header.second.parse(begin_, end_);
 		return true;
 	}
 
-	const std::string& value_;
+	const iterator begin_, end_;
 };
 
 }

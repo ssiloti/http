@@ -46,18 +46,21 @@ public:
 		return boost::fusion::at_key<typename Header::first_type>(known_headers_);
 	}
 
-	std::vector<std::string> header(std::string name) const
+	std::vector<std::string> header(const std::string& name) const
 	{
-		std::vector<std::string> value(
-			detail::apply_to_known_header(known_headers_
-			                            , name
-			                            , detail::serialize_known_header())
-			);
+		std::vector<std::string> value(1);
+		detail::apply_to_known_header(
+			known_headers_,
+			name,
+			detail::serialize_known_header<std::back_insert_iterator<std::string> >(
+				std::back_inserter(value[0])
+			)
+		);
 
-		if (value.empty()) {
+		if (value[0].empty()) {
 			unknown_headers_type::const_iterator unknown_header(
 				unknown_headers_.find(name)
-				);
+			);
 			if (unknown_header != unknown_headers_.end())
 				value = unknown_header->second;
 		}
@@ -65,26 +68,33 @@ public:
 		return value;
 	}
 
-	void header(std::string name, std::string value)
+	void header(const std::string& name, const std::string& value)
 	{
-		if (!detail::apply_to_known_header(known_headers_
-		                                 , name
-		                                 , detail::parse_known_header(value))
+		if (!detail::apply_to_known_header(
+				known_headers_,
+				name,
+				detail::parse_known_header<std::string::const_iterator>(
+					value.begin(),
+					value.end()
+					)
+				)
 			) {
 			unknown_headers_type::iterator header(
 				unknown_headers_.insert(
 					std::make_pair(name, unknown_headers_type::value_type())
 					).first
-				);
+			);
 			header->second.push_back(value);
 		}
 	}
 
 	void remove_header(std::string name)
 	{
-		detail::apply_to_known_header(known_headers_
-		                            , name
-		                            , detail::reset_known_header());
+		detail::apply_to_known_header(
+			known_headers_,
+			name,
+			detail::reset_known_header()
+		);
 		unknown_headers_.erase(name);
 	}
 

@@ -1,5 +1,5 @@
 #include <http/headers/content_length.hpp>
-#include <http/message.hpp>
+#include <http/basic_message.hpp>
 
 #include <boost/fusion/container/map.hpp>
 #include <boost/mpl/string.hpp>
