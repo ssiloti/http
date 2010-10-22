@@ -7,8 +7,8 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef HTTP_MESSAGE_HPP
-#define HTTP_MESSAGE_HPP
+#ifndef HTTP_BASIC_MESSAGE_HPP
+#define HTTP_BASIC_MESSAGE_HPP
 
 #include <http/detail/apply_to_known_header.hpp>
 #include <http/detail/serialize_known_header.hpp>

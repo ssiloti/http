@@ -7,8 +7,8 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef HTTP_PARSE_RULES_HPP
-#define HTTP_PARSE_RULES_HPP
+#ifndef HTTP_BASIC_PARSE_RULES_HPP
+#define HTTP_BASIC_PARSE_RULES_HPP
 
 #include <boost/spirit/home/qi/nonterminal/grammar.hpp>
 #include <boost/spirit/home/qi/directive/lexeme.hpp>
