@@ -18,7 +18,7 @@ struct reset_known_header
 	typedef void result_type;
 
 	template <typename Header>
-	result_type operator()(Header header) const
+	result_type operator()(Header& header) const
 	{
 		header.second.reset();
 	}

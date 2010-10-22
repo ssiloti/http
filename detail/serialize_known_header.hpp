@@ -27,7 +27,7 @@ struct serialize_known_header
 	{}
 
 	template <typename Header>
-	result_type operator()(Header header) const
+	result_type operator()(const Header& header) const
 	{
 		header.second.serialize(sink_);
 	}

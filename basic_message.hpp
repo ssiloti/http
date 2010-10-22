@@ -1,6 +1,6 @@
 //
-// message.hpp
-// ~~~~~~~~~~~
+// basic_message.hpp
+// ~~~~~~~~~~~~~~~~~
 //
 // Copyright (c) 2010 Steven Siloti (ssiloti@gmail.com)
 //
@@ -81,7 +81,7 @@ public:
 			) {
 			unknown_headers_type::iterator header(
 				unknown_headers_.insert(
-					std::make_pair(name, unknown_headers_type::value_type())
+					std::make_pair(name, unknown_headers_type::mapped_type())
 					).first
 			);
 			header->second.push_back(value);

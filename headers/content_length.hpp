@@ -11,6 +11,7 @@
 #define HTTP_HEADERS_CONTENT_LENGTH_HPP
 
 #include <boost/spirit/include/qi_parse_auto.hpp>
+#include <boost/spirit/home/qi/numeric.hpp>
 #include <boost/spirit/include/karma_generate_auto.hpp>
 #include <boost/spirit/home/karma/numeric.hpp>
 
@@ -38,7 +39,7 @@ public:
 	}
 
 	template <typename OutputIterator>
-	void serialize(OutputIterator sink)
+	void serialize(OutputIterator sink) const
 	{
 		boost::spirit::karma::generate(sink, length_);
 	}

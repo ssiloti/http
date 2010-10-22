@@ -30,7 +30,7 @@ struct parse_known_header
 	{}
 
 	template <typename Header>
-	result_type operator()(Header header) const
+	result_type operator()(Header& header) const
 	{
 		header.second.parse(begin_, end_);
 		return true;

@@ -45,6 +45,9 @@
     <ClInclude Include="headers\allow.hpp">
       <Filter>Header Files\headers</Filter>
     </ClInclude>
+    <ClInclude Include="basic_parse_rules.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
