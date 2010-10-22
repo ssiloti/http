@@ -21,36 +21,36 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="version_number.hpp">
+    <ClInclude Include="..\..\..\http\version_number.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="detail\apply_to_known_header.hpp">
+    <ClInclude Include="..\..\..\http\detail\apply_to_known_header.hpp">
       <Filter>Header Files\detail</Filter>
     </ClInclude>
-    <ClInclude Include="detail\serialize_known_header.hpp">
+    <ClInclude Include="..\..\..\http\detail\serialize_known_header.hpp">
       <Filter>Header Files\detail</Filter>
     </ClInclude>
-    <ClInclude Include="detail\parse_known_header.hpp">
+    <ClInclude Include="..\..\..\http\detail\parse_known_header.hpp">
       <Filter>Header Files\detail</Filter>
     </ClInclude>
-    <ClInclude Include="detail\reset_known_header.hpp">
+    <ClInclude Include="..\..\..\http\detail\reset_known_header.hpp">
       <Filter>Header Files\detail</Filter>
     </ClInclude>
-    <ClInclude Include="headers\content_length.hpp">
+    <ClInclude Include="..\..\..\http\headers\content_length.hpp">
       <Filter>Header Files\headers</Filter>
     </ClInclude>
-    <ClInclude Include="basic_message.hpp">
+    <ClInclude Include="..\..\..\http\basic_message.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="headers\allow.hpp">
+    <ClInclude Include="..\..\..\http\headers\allow.hpp">
       <Filter>Header Files\headers</Filter>
     </ClInclude>
-    <ClInclude Include="basic_parse_rules.hpp">
+    <ClInclude Include="..\..\..\http\basic_parse_rules.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="basic_message.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

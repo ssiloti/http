@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "http", "http.vcxproj", "{6E9349D4-BFFD-41CF-AB9B-860799703D23}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "basic_message", "../example/basic_message.vcxproj", "{6E9349D4-BFFD-41CF-AB9B-860799703D23}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

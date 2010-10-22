@@ -39,12 +39,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Program Files\Common Files\boost;..;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Program Files\Common Files\boost;..\..\..;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Program Files\Common Files\boost\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Program Files\Common Files\boost;..;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Program Files\Common Files\boost;..\..\..;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Program Files\Common Files\boost\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -78,18 +78,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="detail\apply_to_known_header.hpp" />
-    <ClInclude Include="detail\parse_known_header.hpp" />
-    <ClInclude Include="detail\reset_known_header.hpp" />
-    <ClInclude Include="detail\serialize_known_header.hpp" />
-    <ClInclude Include="headers\allow.hpp" />
-    <ClInclude Include="headers\content_length.hpp" />
-    <ClInclude Include="basic_message.hpp" />
-    <ClInclude Include="basic_parse_rules.hpp" />
-    <ClInclude Include="version_number.hpp" />
+    <ClInclude Include="..\..\..\http\detail\apply_to_known_header.hpp" />
+    <ClInclude Include="..\..\..\http\detail\parse_known_header.hpp" />
+    <ClInclude Include="..\..\..\http\detail\reset_known_header.hpp" />
+    <ClInclude Include="..\..\..\http\detail\serialize_known_header.hpp" />
+    <ClInclude Include="..\..\..\http\headers\allow.hpp" />
+    <ClInclude Include="..\..\..\http\headers\content_length.hpp" />
+    <ClInclude Include="..\..\..\http\basic_message.hpp" />
+    <ClInclude Include="..\..\..\http\basic_parse_rules.hpp" />
+    <ClInclude Include="..\..\..\http\version_number.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="basic_message.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
