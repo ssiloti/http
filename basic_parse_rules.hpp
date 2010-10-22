@@ -22,17 +22,6 @@
 #include <vector>
 
 namespace http {
-	/*
-namespace detail {
-	struct foo;
-
-	typedef boost::variant<std::string, boost::recursive_wrapper<foo> > attr;
-
-	struct foo
-	{
-		std::vector<attr> bar;
-	};
-}*/
 
 // The basic parse rules defined by RFC 2616 Section 2.2
 template <typename Iter>
@@ -135,10 +124,5 @@ private:
 };
 
 }
-/*
-BOOST_FUSION_ADAPT_STRUCT(
-    http::detail::foo,
-    (std::vector<http::detail::attr>, bar)
-)*/
 
 #endif
