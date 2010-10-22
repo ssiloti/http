@@ -82,7 +82,12 @@ struct basic_parse_rules
 	boost::spirit::qi::rule<iterator, std::string()> token;
 	boost::spirit::qi::rule<iterator> separators;
 
-	boost::spirit::qi::rule<iterator, std::vector<boost::make_recursive_variant<std::vector<char>, std::vector<boost::recursive_variant_> >::type>()> comment;
+	boost::spirit::qi::rule<iterator, std::vector<
+		boost::make_recursive_variant<
+			std::string, std::vector<boost::recursive_variant_>
+			>::type>()
+		> comment;
+	boost::spirit::qi::rule<iterator, std::string()> ctext_quoted_pair;
 	boost::spirit::qi::rule<iterator, char()> ctext;
 
 	boost::spirit::qi::rule<iterator, std::string()> quoted_string;
@@ -116,7 +121,10 @@ private:
 		token = +(char__ - ctl - separators);
 		separators = ascii::char_("()<>@,;:\\\"/[]?={}") | sp | ht;
 
-		comment = '(' >> *(*(ctext | quoted_pair) | comment) >> ')';
+		comment = '(' >> *(ctext_quoted_pair | comment) >> ')';
+		// Use a separate rule so we can adapt the std::vector<char> into an std::string
+		// Qi can't adapt variant<std::vector<char>, B> to variant<std::string, B>
+		ctext_quoted_pair = *(ctext | quoted_pair);
 		ctext = text - '(' - ')';
 
 		quoted_string = '"' >> *(qdtext | quoted_pair) >> '"';
