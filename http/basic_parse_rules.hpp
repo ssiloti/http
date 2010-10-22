@@ -33,9 +33,9 @@ struct basic_parse_rules
 	{
 		skipper_type() : skipper_type::base_type(lws)
 		{
-			using namespace boost::spirit::ascii;
+			using namespace boost::spirit;
 
-			lws = -(char_('\r') >> char_('\n')) >> +(char_(' ') | char_('\t'));
+			lws = -(ascii::char_('\r') >> ascii::char_('\n')) >> +(ascii::char_(' ') | ascii::char_('\t'));
 		}
 
 		boost::spirit::qi::rule<iterator> lws;
@@ -49,14 +49,14 @@ struct basic_parse_rules
 		return rules;
 	}
 
-	boost::spirit::qi::rule<iterator, char()> octet;     // = <any 8-bit sequence of data>
-	boost::spirit::qi::rule<iterator, char()> char__;    // = <any US-ASCII character (octets 0 - 127)>
-	boost::spirit::qi::rule<iterator, char()> upalpha;   // = <any US-ASCII uppercase letter "A".."Z">
-	boost::spirit::qi::rule<iterator, char()> loalpha;   // = <any US-ASCII lowercase letter "a".."z">
-	boost::spirit::qi::rule<iterator, char()> alpha;     // = UPALPHA | LOALPHA
-	boost::spirit::qi::rule<iterator, char()> digit;     // = <any US-ASCII digit "0".."9">
-	boost::spirit::qi::rule<iterator, char()> ctl;       // = <any US-ASCII control character
-	                     //    (octets 0 - 31) and DEL (127)>
+	boost::spirit::qi::byte__type octet;        // = <any 8-bit sequence of data>
+	boost::spirit::ascii::char_type char_;     // = <any US-ASCII character (octets 0 - 127)>
+	boost::spirit::ascii::upper_type upalpha;   // = <any US-ASCII uppercase letter "A".."Z">
+	boost::spirit::ascii::lower_type loalpha;   // = <any US-ASCII lowercase letter "a".."z">
+	boost::spirit::ascii::alpha_type alpha;     // = UPALPHA | LOALPHA
+	boost::spirit::ascii::digit_type digit;     // = <any US-ASCII digit "0".."9">
+	boost::spirit::ascii::cntrl_type ctl;       // = <any US-ASCII control character
+	                                            //    (octets 0 - 31) and DEL (127)>
 	boost::spirit::qi::rule<iterator, char()> cr;        // = <US-ASCII CR, carriage return (13)>
 	boost::spirit::qi::rule<iterator, char()> lf;        // = <US-ASCII LF, linefeed (10)>
 	boost::spirit::qi::rule<iterator, char()> sp;        // = <US-ASCII SP, space (32)>
@@ -89,13 +89,6 @@ private:
 	{
 		using namespace boost::spirit;
 
-		octet = byte_;
-		char__ = ascii::char_;
-		upalpha = ascii::upper;
-		loalpha = ascii::lower;
-		alpha = ascii::alpha;
-		digit = ascii::digit;
-		ctl = ascii::cntrl;
 		cr = ascii::char_('\r');
 		lf = ascii::char_('\n');
 		sp = ascii::char_(' ');
@@ -107,7 +100,7 @@ private:
 		text = octet - ctl;
 		hex = digit | ascii::char_("A-Fa-f");
 
-		token = +(char__ - ctl - separators);
+		token = +(char_ - ctl - separators);
 		separators = ascii::char_("()<>@,;:\\\"/[]?={}") | sp | ht;
 
 		comment = '(' >> *(ctext_quoted_pair | comment) >> ')';
@@ -119,7 +112,7 @@ private:
 		quoted_string = '"' >> *(qdtext | quoted_pair) >> '"';
 		qdtext = text - '"';
 
-		quoted_pair = '\\' >> char__;
+		quoted_pair = '\\' >> char_;
 	}
 };
 
