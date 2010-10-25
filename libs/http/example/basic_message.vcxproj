@@ -86,6 +86,7 @@
     <ClInclude Include="..\..\..\http\headers\content_length.hpp" />
     <ClInclude Include="..\..\..\http\basic_message.hpp" />
     <ClInclude Include="..\..\..\http\basic_parse_rules.hpp" />
+    <ClInclude Include="..\..\..\http\headers_map.hpp" />
     <ClInclude Include="..\..\..\http\version_number.hpp" />
   </ItemGroup>
   <ItemGroup>

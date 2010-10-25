@@ -15,7 +15,7 @@
 #include <boost/spirit/include/karma_generate_auto.hpp>
 #include <boost/spirit/home/karma/numeric.hpp>
 
-#include <boost/fusion/support/pair.hpp>
+#include <boost/mpl/pair.hpp>
 #include <boost/mpl/string.hpp>
 
 namespace http {
@@ -44,7 +44,7 @@ public:
 		boost::spirit::karma::generate(sink, length_);
 	}
 
-	void reset()
+	void clear()
 	{
 		length_ = 0;
 	}
@@ -58,7 +58,7 @@ private:
 	std::size_t length_;
 };
 
-typedef boost::fusion::pair<boost::mpl::string<'cont', 'ent-', 'leng', 'th'>, content_length_value> content_length;
+typedef boost::mpl::pair<boost::mpl::string<'cont', 'ent-', 'leng', 'th'>, content_length_value> content_length;
 
 }
 }

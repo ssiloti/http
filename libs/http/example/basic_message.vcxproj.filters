@@ -48,6 +48,9 @@
     <ClInclude Include="..\..\..\http\basic_parse_rules.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\http\headers_map.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="basic_message.cpp">

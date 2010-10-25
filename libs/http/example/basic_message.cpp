@@ -11,23 +11,21 @@
 #include <http/headers/allow.hpp>
 #include <http/basic_message.hpp>
 
-#include <boost/fusion/container/map.hpp>
-#include <boost/mpl/string.hpp>
+#include <boost/mpl/map.hpp>
 
 #include <iostream>
 
 int main()
 {
-	namespace f = boost::fusion;
 	namespace m = boost::mpl;
 	using namespace http::headers;
 
-	typedef f::map<content_length, allow> headers;
+	typedef m::map<content_length, allow> headers;
 
-	http::basic_message<headers, void> msg;
+	http::basic_message<headers, std::string> msg;
 
-	msg.header<content_length>() = 1234;
-	msg.header("allow", "GET, POST, PUT");
-	std::cout << msg.header("content-length")[0] << std::endl;
-	std::cout << msg.header("allow")[0];
+	msg.headers.at<content_length>() = 1234;
+	msg.headers.insert(http::headers_map<headers>::value_type("allow", "GET, POST, PUT"));
+	std::cout << msg.headers.find("content-length")->second.operator std::string() << std::endl;
+	std::cout << msg.headers.find("allow")->second.operator std::string();
 }

@@ -18,7 +18,7 @@
 #include <boost/spirit/home/karma/string.hpp>
 #include <boost/spirit/home/karma/operator.hpp>
 
-#include <boost/fusion/support/pair.hpp>
+#include <boost/mpl/pair.hpp>
 #include <boost/mpl/string.hpp>
 
 #include <string>
@@ -44,7 +44,7 @@ public:
 		karma::generate(sink, karma::string % ',', allowed_methods_);
 	}
 
-	void reset()
+	void clear()
 	{
 		allowed_methods_.clear();
 	}
@@ -53,7 +53,7 @@ private:
 	std::vector<std::string> allowed_methods_;
 };
 
-typedef boost::fusion::pair<boost::mpl::string<'allo', 'w'>, allow_value> allow;
+typedef boost::mpl::pair<boost::mpl::string<'allo', 'w'>, allow_value> allow;
 
 }
 }
