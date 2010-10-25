@@ -78,10 +78,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\http\detail\apply_to_known_header.hpp" />
-    <ClInclude Include="..\..\..\http\detail\parse_known_header.hpp" />
-    <ClInclude Include="..\..\..\http\detail\reset_known_header.hpp" />
-    <ClInclude Include="..\..\..\http\detail\serialize_known_header.hpp" />
     <ClInclude Include="..\..\..\http\headers\allow.hpp" />
     <ClInclude Include="..\..\..\http\headers\content_length.hpp" />
     <ClInclude Include="..\..\..\http\basic_message.hpp" />

@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\detail">
-      <UniqueIdentifier>{45584b3b-19d9-4eb7-baab-7168d22eba0e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\headers">
       <UniqueIdentifier>{dacb7f0b-f5bf-491c-8927-d66d9390b474}</UniqueIdentifier>
     </Filter>
@@ -23,18 +20,6 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\http\version_number.hpp">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\http\detail\apply_to_known_header.hpp">
-      <Filter>Header Files\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\http\detail\serialize_known_header.hpp">
-      <Filter>Header Files\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\http\detail\parse_known_header.hpp">
-      <Filter>Header Files\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\http\detail\reset_known_header.hpp">
-      <Filter>Header Files\detail</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\http\headers\content_length.hpp">
       <Filter>Header Files\headers</Filter>
