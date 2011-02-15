@@ -23,7 +23,7 @@
 
 namespace http {
 
-// The basic parse rules defined by RFC 2616 Section 2.2
+// The basic parse rules used by HTTP 1.1
 template <typename Iter>
 struct basic_parse_rules
 {
@@ -49,71 +49,88 @@ struct basic_parse_rules
 		return rules;
 	}
 
-	boost::spirit::qi::byte__type octet;        // = <any 8-bit sequence of data>
-	boost::spirit::ascii::char_type char_;     // = <any US-ASCII character (octets 0 - 127)>
-	boost::spirit::ascii::upper_type upalpha;   // = <any US-ASCII uppercase letter "A".."Z">
-	boost::spirit::ascii::lower_type loalpha;   // = <any US-ASCII lowercase letter "a".."z">
-	boost::spirit::ascii::alpha_type alpha;     // = UPALPHA | LOALPHA
-	boost::spirit::ascii::digit_type digit;     // = <any US-ASCII digit "0".."9">
-	boost::spirit::ascii::cntrl_type ctl;       // = <any US-ASCII control character
-	                                            //    (octets 0 - 31) and DEL (127)>
-	boost::spirit::qi::rule<iterator, char()> cr;        // = <US-ASCII CR, carriage return (13)>
-	boost::spirit::qi::rule<iterator, char()> lf;        // = <US-ASCII LF, linefeed (10)>
-	boost::spirit::qi::rule<iterator, char()> sp;        // = <US-ASCII SP, space (32)>
-	boost::spirit::qi::rule<iterator, char()> ht;        // = <US-ASCII HT, horizontal-tab (9)>
-	boost::spirit::qi::rule<iterator, char()> dq;        // = <US-ASCII double-quote mark (34)>
+    // Defined in RFC 5234, Appendix B.1
+    boost::spirit::ascii::alpha_type alpha;           // A-Z / a-z
+    boost::spirit::qi::rule<iterator> cr;             // carriage return
+    boost::spirit::qi::rule<iterator> crlf;           // Internet standard newline
+    boost::spirit::ascii::cntrl_type ctl;             // controls
+    boost::spirit::ascii::digit_type digit;           // 0-9
+    boost::spirit::qi::rule<iterator, char()> dquote; // " (Double Quote)
+    boost::spirit::qi::xdigit_type hexdig;
+    boost::spirit::qi::rule<iterator, char()> htab;   // horizontal tab
+    boost::spirit::qi::rule<iterator> lf;             // linefeed
+    boost::spirit::qi::byte__type octet;              // 8 bits of data
+    boost::spirit::qi::rule<iterator, char()> sp;
+    boost::spirit::ascii::print_type vchar;           // visible (printing) characters
+    boost::spirit::qi::rule<iterator, char()> wsp;    // white space
 
-	boost::spirit::qi::rule<iterator> crlf;
-	boost::spirit::qi::rule<iterator> lws;
-	boost::spirit::qi::rule<iterator, char()> text;
-	boost::spirit::qi::rule<iterator, char()> hex;
+    // Defined in ietf-httpbis-p1-messaging-12, Section 1.2.2
+    boost::spirit::qi::rule<iterator> ows;            // "optional" whitespace
+    boost::spirit::qi::rule<iterator> rws;            // "required" whitespace
+    boost::spirit::qi::rule<iterator> bws;            // "bad" whitespace
+    boost::spirit::qi::rule<iterator> obs_fold;       // depricated line folding
 
-	boost::spirit::qi::rule<iterator, std::string()> token;
-	boost::spirit::qi::rule<iterator> separators;
+    boost::spirit::qi::rule<iterator, char()> special;
+    boost::spirit::qi::rule<iterator, char()> tchar;
 
-	boost::spirit::qi::rule<iterator, std::vector<
-		boost::make_recursive_variant<
-			std::string, std::vector<boost::recursive_variant_>
-			>::type>()
-		> comment;
-	boost::spirit::qi::rule<iterator, std::string()> ctext_quoted_pair;
-	boost::spirit::qi::rule<iterator, char()> ctext;
+    boost::spirit::qi::rule<iterator, std::string()> quoted_string;
+    boost::spirit::qi::rule<iterator, std::string()> token;
+    boost::spirit::qi::rule<iterator, std::string()> word;
+    boost::spirit::qi::rule<iterator, char()> qdtext;
+    boost::spirit::qi::rule<iterator> obs_text;
+    boost::spirit::qi::rule<iterator, char()> quoted_pair;
 
-	boost::spirit::qi::rule<iterator, std::string()> quoted_string;
-	boost::spirit::qi::rule<iterator, char()> qdtext;
-
-	boost::spirit::qi::rule<iterator, char()> quoted_pair;
+    // Defined in ietf-httpbis-p1-messaging-12, Section 3.2
+    boost::spirit::qi::rule<iterator, std::vector<
+        boost::make_recursive_variant<
+            std::string, std::vector<boost::recursive_variant_>
+            >::type>()
+        > comment;
+    // ctext_or_quoted_cpair is non-standard, it is needed to synthesize the
+    // the desired attribute from comment
+    boost::spirit::qi::rule<iterator, std::string()> ctext_or_quoted_cpair;
+    boost::spirit::qi::rule<iterator, char()> quoted_cpair;
+    boost::spirit::qi::rule<iterator, char()> ctext;
 
 private:
-	basic_parse_rules()
-	{
-		using namespace boost::spirit;
+    basic_parse_rules()
+    {
+        using namespace boost::spirit;
 
-		cr = ascii::char_('\r');
-		lf = ascii::char_('\n');
-		sp = ascii::char_(' ');
-		ht = ascii::char_('\t');
-		dq = ascii::char_('"');
+        cr     = lit('\r');
+        crlf   = cr >> lf;
+        dquote %= ascii::char_('"');
+        htab   %= ascii::char_('\t');
+        lf     = lit('\n');
+        sp     %= ascii::char_(' ');
+        wsp    %= sp | htab;
 
-		crlf = cr >> lf;
-		lws = -crlf >> +(sp | ht);
-		text = octet - ctl;
-		hex = digit | ascii::char_("A-Fa-f");
+        ows = *(-obs_fold >> wsp);
+        rws = +(-obs_fold >> wsp);
+        bws = ows;
+        obs_fold = crlf;
 
-		token = +(char_ - ctl - separators);
-		separators = ascii::char_("()<>@,;:\\\"/[]?={}") | sp | ht;
+        special %= ascii::char_("()<>@,;:\\/[]?={}") | dquote;
+        tchar   %= vchar - special;
 
-		comment = '(' >> *(ctext_quoted_pair | comment) >> ')';
-		// Use a separate rule so we can adapt the std::vector<char> into an std::string
-		// Qi can't adapt variant<std::vector<char>, B> to variant<std::string, B>
-		ctext_quoted_pair = *(ctext | quoted_pair);
-		ctext = text - '(' - ')';
+        quoted_string %= dquote >> *(qdtext | quoted_pair) >> dquote;
+        token         %= +tchar;
+        word          %= token | quoted_string;
+        // Switched from ows to (-obs_fold >> wsp) to avoid sythesizing
+        // a vector attribute. quoted_string takes care of the empty case.
+        qdtext        %= (-obs_fold >> wsp) | (vchar - dquote - '\\') | obs_text;
+        obs_text      %= ascii::char_("\x80-\xFF");
+        quoted_pair   %= '\\' >> (wsp | vchar | obs_text);
 
-		quoted_string = '"' >> *(qdtext | quoted_pair) >> '"';
-		qdtext = text - '"';
-
-		quoted_pair = '\\' >> char_;
-	}
+        comment %= '(' >> *(ctext_or_quoted_cpair | comment) >> ')';
+        // Use a separate rule so we can adapt the std::vector<char> into an std::string
+        // Qi can't adapt variant<std::vector<char>, B> to variant<std::string, B>
+        ctext_or_quoted_cpair %= *(ctext | quoted_cpair);
+        quoted_cpair %= '\\' >> (wsp | vchar | obs_text);
+        // Switched from ows to (-obs_fold >> wsp) to avoid sythesizing
+        // a vector attribute. ctext_or_quoted_cpair takes care of the empty case.
+        ctext %= (-obs_fold >> wsp) | (vchar - '(' - ')' - '\\') | obs_text;
+    }
 };
 
 }

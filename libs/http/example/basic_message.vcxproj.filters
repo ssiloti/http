@@ -36,6 +36,15 @@
     <ClInclude Include="..\..\..\http\headers_map.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\http\basic_request.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\http\basic_message_parser.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\http\async_read.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="basic_message.cpp">

@@ -10,6 +10,7 @@
 #include <http/headers/content_length.hpp>
 #include <http/headers/allow.hpp>
 #include <http/basic_message.hpp>
+#include <http/basic_request.hpp>
 
 #include <boost/mpl/map.hpp>
 
@@ -28,4 +29,7 @@ int main()
 	msg.headers.insert(http::headers_map<headers>::value_type("allow", "GET, POST, PUT"));
 	std::cout << msg.headers.find("content-length")->second.operator std::string() << std::endl;
 	std::cout << msg.headers.find("allow")->second.operator std::string();
+
+    uri::http_uri<std::string> test_uri;
+    uri::parse(std::string("http://example.com"), test_uri);
 }

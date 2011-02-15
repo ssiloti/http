@@ -58,8 +58,8 @@ private:
 	std::size_t length_;
 };
 
-typedef boost::mpl::pair<boost::mpl::string<'cont', 'ent-', 'leng', 'th'>, content_length_value> content_length;
-
+typedef boost::mpl::pair<boost::mpl::string<'cont', 'ent-', 'leng', 'th'>,
+        content_length_value> content_length;
 }
 }
 
