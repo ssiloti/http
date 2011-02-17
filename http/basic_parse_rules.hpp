@@ -10,6 +10,8 @@
 #ifndef HTTP_BASIC_PARSE_RULES_HPP
 #define HTTP_BASIC_PARSE_RULES_HPP
 
+#include <rfc5234/core_rules.hpp>
+
 #include <boost/spirit/home/qi/nonterminal/grammar.hpp>
 #include <boost/spirit/home/qi/directive/lexeme.hpp>
 #include <boost/spirit/home/qi/binary.hpp>
@@ -24,45 +26,56 @@
 namespace http {
 
 // The basic parse rules used by HTTP 1.1
-template <typename Iter>
-struct basic_parse_rules
+template <typename Iterator>
+class basic_parse_rules : public rfc5234::core_rules<Iterator>
 {
-	typedef Iter iterator;
+public:
+    typedef Iterator iterator;
 
-	struct skipper_type : boost::spirit::qi::grammar<iterator>
-	{
-		skipper_type() : skipper_type::base_type(lws)
-		{
-			using namespace boost::spirit;
+    struct skipper_type : boost::spirit::qi::grammar<iterator>
+    {
+        skipper_type() : skipper_type::base_type(lws)
+        {
+            using namespace boost::spirit;
 
-			lws = -(ascii::char_('\r') >> ascii::char_('\n')) >> +(ascii::char_(' ') | ascii::char_('\t'));
-		}
+            lws = -(ascii::char_('\r') >> ascii::char_('\n')) >> +(ascii::char_(' ') | ascii::char_('\t'));
+        }
 
-		boost::spirit::qi::rule<iterator> lws;
-	};
+        boost::spirit::qi::rule<iterator> lws;
+    };
 
-	skipper_type skipper;
+    basic_parse_rules()
+    {
+        using namespace boost::spirit;
 
-	static const basic_parse_rules<iterator>& get()
-	{
-		static basic_parse_rules<iterator> rules;
-		return rules;
-	}
+        ows = *(-obs_fold >> wsp);
+        rws = +(-obs_fold >> wsp);
+        bws = ows;
+        obs_fold = crlf;
 
-    // Defined in RFC 5234, Appendix B.1
-    boost::spirit::ascii::alpha_type alpha;           // A-Z / a-z
-    boost::spirit::qi::rule<iterator> cr;             // carriage return
-    boost::spirit::qi::rule<iterator> crlf;           // Internet standard newline
-    boost::spirit::ascii::cntrl_type ctl;             // controls
-    boost::spirit::ascii::digit_type digit;           // 0-9
-    boost::spirit::qi::rule<iterator, char()> dquote; // " (Double Quote)
-    boost::spirit::qi::xdigit_type hexdig;
-    boost::spirit::qi::rule<iterator, char()> htab;   // horizontal tab
-    boost::spirit::qi::rule<iterator> lf;             // linefeed
-    boost::spirit::qi::byte__type octet;              // 8 bits of data
-    boost::spirit::qi::rule<iterator, char()> sp;
-    boost::spirit::ascii::print_type vchar;           // visible (printing) characters
-    boost::spirit::qi::rule<iterator, char()> wsp;    // white space
+        special %= ascii::char_("()<>@,;:\\/[]?={}") | dquote;
+        tchar   %= vchar - special;
+
+        quoted_string %= dquote >> *(qdtext | quoted_pair) >> dquote;
+        token         %= +tchar;
+        word          %= token | quoted_string;
+        // Switched from ows to (-obs_fold >> wsp) to avoid sythesizing
+        // a vector attribute. quoted_string takes care of the empty case.
+        qdtext        %= (-obs_fold >> wsp) | (vchar - dquote - '\\') | obs_text;
+        obs_text      %= ascii::char_("\x80-\xFF");
+        quoted_pair   %= '\\' >> (wsp | vchar | obs_text);
+
+        comment %= '(' >> *(ctext_or_quoted_cpair | comment) >> ')';
+        // Use a separate rule so we can adapt the std::vector<char> into an std::string
+        // Qi can't adapt variant<std::vector<char>, B> to variant<std::string, B>
+        ctext_or_quoted_cpair %= *(ctext | quoted_cpair);
+        quoted_cpair %= '\\' >> (wsp | vchar | obs_text);
+        // Switched from ows to (-obs_fold >> wsp) to avoid sythesizing
+        // a vector attribute. ctext_or_quoted_cpair takes care of the empty case.
+        ctext %= (-obs_fold >> wsp) | (vchar - '(' - ')' - '\\') | obs_text;
+    }
+
+    skipper_type skipper;
 
     // Defined in ietf-httpbis-p1-messaging-12, Section 1.2.2
     boost::spirit::qi::rule<iterator> ows;            // "optional" whitespace
@@ -91,46 +104,6 @@ struct basic_parse_rules
     boost::spirit::qi::rule<iterator, std::string()> ctext_or_quoted_cpair;
     boost::spirit::qi::rule<iterator, char()> quoted_cpair;
     boost::spirit::qi::rule<iterator, char()> ctext;
-
-private:
-    basic_parse_rules()
-    {
-        using namespace boost::spirit;
-
-        cr     = lit('\r');
-        crlf   = cr >> lf;
-        dquote %= ascii::char_('"');
-        htab   %= ascii::char_('\t');
-        lf     = lit('\n');
-        sp     %= ascii::char_(' ');
-        wsp    %= sp | htab;
-
-        ows = *(-obs_fold >> wsp);
-        rws = +(-obs_fold >> wsp);
-        bws = ows;
-        obs_fold = crlf;
-
-        special %= ascii::char_("()<>@,;:\\/[]?={}") | dquote;
-        tchar   %= vchar - special;
-
-        quoted_string %= dquote >> *(qdtext | quoted_pair) >> dquote;
-        token         %= +tchar;
-        word          %= token | quoted_string;
-        // Switched from ows to (-obs_fold >> wsp) to avoid sythesizing
-        // a vector attribute. quoted_string takes care of the empty case.
-        qdtext        %= (-obs_fold >> wsp) | (vchar - dquote - '\\') | obs_text;
-        obs_text      %= ascii::char_("\x80-\xFF");
-        quoted_pair   %= '\\' >> (wsp | vchar | obs_text);
-
-        comment %= '(' >> *(ctext_or_quoted_cpair | comment) >> ')';
-        // Use a separate rule so we can adapt the std::vector<char> into an std::string
-        // Qi can't adapt variant<std::vector<char>, B> to variant<std::string, B>
-        ctext_or_quoted_cpair %= *(ctext | quoted_cpair);
-        quoted_cpair %= '\\' >> (wsp | vchar | obs_text);
-        // Switched from ows to (-obs_fold >> wsp) to avoid sythesizing
-        // a vector attribute. ctext_or_quoted_cpair takes care of the empty case.
-        ctext %= (-obs_fold >> wsp) | (vchar - '(' - ')' - '\\') | obs_text;
-    }
 };
 
 }

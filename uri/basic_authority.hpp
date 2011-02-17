@@ -7,6 +7,8 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
+#ifndef URI_BASIC_AUTHORITY_HPP
+#define URI_BASIC_AUTHORITY_HPP
 
 #include <boost/spirit/home/qi/domain.hpp>
 //#include <boost/spirit/home/support/attributes.hpp>
@@ -76,7 +78,7 @@ struct authority_tuple
 } // namespace uri
 
 namespace boost { namespace spirit { namespace traits {
-//#if 0
+
 template <typename String>
 struct transform_attribute<
     uri::basic_authority<String>,
@@ -99,45 +101,7 @@ struct transform_attribute<
 
     static void fail(uri::basic_authority<String>& val) { }
 };
-//#endif
-#if 0
-template <typename String>
-struct transform_attribute<
-    uri::basic_authority<String>,
-    String,
-    boost::spirit::qi::domain
->
-{
-    typedef String& type;
 
-    static type pre(uri::basic_authority<String>& exposed)
-    {
-        return exposed.host;
-    }
-
-    static void post(uri::basic_authority<String>&, const String&) { }
-
-    static void fail(uri::basic_authority<String>& val) { }
-};
-#endif
 } } } // namespace traits namespace spirit namespace boost
 
-#if 0
-namespace uri {
-
-template <typename String>
-template <typename Iterator>
-const boost::spirit::qi::rule<Iterator, basic_authority<String>()>& basic_authority<String>::parse_rule()
-{
-    using namespace boost::spirit::qi;
-
-    const basic_parse_rules<Iterator, String>& basic_rules
-            = basic_parse_rules<iterator, String>::get();
-
-    static rule<Iterator, basic_authority<String>()> authority;
-    authority %= -(basic_rules.user_info >> '@') >> basic_rules.host >> -(':' >> ushort_);
-    return authority;
-}
-
-} // namespace uri
 #endif
