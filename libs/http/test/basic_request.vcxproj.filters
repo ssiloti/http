@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="basic_message_parser.cpp">
+    <ClCompile Include="basic_request.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -19,12 +19,16 @@ template <typename Headers, typename Body>
 class basic_message
 {
 public:
-	typedef headers_map<Headers> headers_type;
-	typedef Body entity_body_type;
+    typedef headers_map<Headers> headers_type;
+    typedef Body entity_body_type;
+    typedef version_number version_number_type;
 
-	version_number version;
-	headers_type headers;
-	entity_body_type body;
+    template <typename InputIterator>
+    bool parse_header(InputIterator begin, InputIterator sep, InputIterator end);
+
+    version_number version;
+    headers_type headers;
+    entity_body_type body;
 };
 
 }

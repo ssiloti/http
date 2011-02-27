@@ -7,7 +7,7 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-#include <http/basic_message_parser.hpp>
+#include <http/parsers/message_state.hpp>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/test/included/unit_test_framework.hpp>
@@ -34,7 +34,7 @@ struct test_message
     }
 
     template <typename InputIterator>
-    bool parse_header(InputIterator begin, InputIterator end)
+    bool parse_header(InputIterator begin, InputIterator sep, InputIterator end)
     {
         BOOST_CHECK_MESSAGE(std::equal(begin, end,
                                current_header_->begin()),
@@ -57,7 +57,7 @@ void test_message_parser()
 
     {
         test_message test_msg("GET index.html HTTP/1.1", headers);
-        http::basic_message_parser<test_message, std::string::const_iterator> test_parser(test_msg);
+        http::parsers::message_state<test_message, std::string::const_iterator> test_parser(test_msg);
     
         std::string::const_iterator begin = test_string.begin();
         test_parser.parse(begin, test_string.end());
@@ -65,7 +65,7 @@ void test_message_parser()
 
     {
         test_message test_msg("GET index.html HTTP/1.1", headers);
-        http::basic_message_parser<test_message, std::string::const_iterator> test_parser(test_msg);
+        http::parsers::message_state<test_message, std::string::const_iterator> test_parser(test_msg);
 
         std::string::const_iterator begin = test_string.begin();
         std::string::const_iterator end = begin + 1;
@@ -77,7 +77,7 @@ void test_message_parser()
 
     {
         test_message test_msg("GET index.html HTTP/1.1", headers);
-        http::basic_message_parser<test_message, std::string::const_iterator> test_parser(test_msg);
+        http::parsers::message_state<test_message, std::string::const_iterator> test_parser(test_msg);
 
         std::string::const_iterator begin = test_string.begin();
         std::string::const_iterator end = begin + 2;

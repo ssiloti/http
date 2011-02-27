@@ -1,5 +1,5 @@
 //
-// basic_parse_rules.hpp
+// basic_rules.hpp
 // ~~~~~~~~~~~~~~~~~~~~~
 //
 // Copyright (c) 2010 Steven Siloti (ssiloti@gmail.com)
@@ -7,10 +7,10 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef HTTP_BASIC_PARSE_RULES_HPP
-#define HTTP_BASIC_PARSE_RULES_HPP
+#ifndef HTTP_BASIC_RULES_HPP
+#define HTTP_BASIC_RULES_HPP
 
-#include <rfc5234/core_rules.hpp>
+#include <abnf/core_rules.hpp>
 
 #include <boost/spirit/home/qi/nonterminal/grammar.hpp>
 #include <boost/spirit/home/qi/directive/lexeme.hpp>
@@ -23,11 +23,11 @@
 #include <string>
 #include <vector>
 
-namespace http {
+namespace http { namespace parsers {
 
 // The basic parse rules used by HTTP 1.1
 template <typename Iterator>
-class basic_parse_rules : public rfc5234::core_rules<Iterator>
+class basic_rules : public abnf::core_rules<Iterator>
 {
 public:
     typedef Iterator iterator;
@@ -44,7 +44,7 @@ public:
         boost::spirit::qi::rule<iterator> lws;
     };
 
-    basic_parse_rules()
+    basic_rules()
     {
         using namespace boost::spirit;
 
@@ -56,14 +56,14 @@ public:
         special %= ascii::char_("()<>@,;:\\/[]?={}") | dquote;
         tchar   %= vchar - special;
 
-        quoted_string %= dquote >> *(qdtext | quoted_pair) >> dquote;
-        token         %= +tchar;
+        quoted_string %= lexeme[dquote >> *(qdtext | quoted_pair) >> dquote];
+        token         %= lexeme[+tchar];
         word          %= token | quoted_string;
         // Switched from ows to (-obs_fold >> wsp) to avoid sythesizing
         // a vector attribute. quoted_string takes care of the empty case.
         qdtext        %= (-obs_fold >> wsp) | (vchar - dquote - '\\') | obs_text;
         obs_text      %= ascii::char_("\x80-\xFF");
-        quoted_pair   %= '\\' >> (wsp | vchar | obs_text);
+        quoted_pair   %= lexeme['\\' >> (wsp | vchar | obs_text)];
 
         comment %= '(' >> *(ctext_or_quoted_cpair | comment) >> ')';
         // Use a separate rule so we can adapt the std::vector<char> into an std::string
@@ -90,7 +90,7 @@ public:
     boost::spirit::qi::rule<iterator, std::string()> token;
     boost::spirit::qi::rule<iterator, std::string()> word;
     boost::spirit::qi::rule<iterator, char()> qdtext;
-    boost::spirit::qi::rule<iterator> obs_text;
+    boost::spirit::qi::rule<iterator, char()> obs_text;
     boost::spirit::qi::rule<iterator, char()> quoted_pair;
 
     // Defined in ietf-httpbis-p1-messaging-12, Section 3.2
@@ -106,6 +106,6 @@ public:
     boost::spirit::qi::rule<iterator, char()> ctext;
 };
 
-}
+} } // namespace parsers namespace http
 
 #endif

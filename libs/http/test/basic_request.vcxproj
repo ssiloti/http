@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{6E9349D4-BFFD-41CF-AB9B-860799703D23}</ProjectGuid>
+    <ProjectGuid>{FF887EFE-E03B-4303-A64F-5F79DA37568B}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>http</RootNamespace>
+    <RootNamespace>basic_request</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -39,12 +39,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Program Files\Common Files\boost;..\..\..;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\..;C:\Program Files\Common Files\boost;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Program Files\Common Files\boost\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Program Files\Common Files\boost;..\..\..;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\..;C:\Program Files\Common Files\boost;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Program Files\Common Files\boost\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -53,7 +53,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -78,15 +78,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\http\async_read.hpp" />
-    <ClInclude Include="..\..\..\http\basic_request.hpp" />
-    <ClInclude Include="..\..\..\http\basic_rules.hpp" />
-    <ClInclude Include="..\..\..\http\basic_message.hpp" />
-    <ClInclude Include="..\..\..\http\headers_map.hpp" />
-    <ClInclude Include="..\..\..\http\version_number.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="basic_message.cpp" />
+    <ClCompile Include="basic_request.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

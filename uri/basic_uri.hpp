@@ -28,7 +28,7 @@ struct basic_uri
         if (!parse_uri(uri, parts_))
             throw invalid_uri();
     }
-#endif
+
 
     basic_uri& operator=(basic_uri<string_type> other)
     {
@@ -40,7 +40,7 @@ struct basic_uri
     {
         return *this = basic_uri<string_type>(uri);
     }
-
+#endif
 #if 0
     void swap(basic_uri<string_type>& other)
     {

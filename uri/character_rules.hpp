@@ -14,6 +14,7 @@
 
 #include <abnf/core_rules.hpp>
 
+#include <boost/spirit/home/qi/directive/raw.hpp>
 #include <boost/spirit/home/qi/directive/repeat.hpp>
 
 namespace uri {

@@ -13,7 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F5969B74-1553-4C09-98A1-8ECF752A63CA}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>basic_message_parser</RootNamespace>
+    <RootNamespace>parser_message_state</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -80,7 +80,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="basic_message_parser.cpp" />
+    <ClCompile Include="parser_message_state.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

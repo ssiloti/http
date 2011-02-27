@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "basic_message", "..\example\basic_message.vcxproj", "{6E9349D4-BFFD-41CF-AB9B-860799703D23}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "basic_message_parser", "..\test\basic_message_parser.vcxproj", "{F5969B74-1553-4C09-98A1-8ECF752A63CA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "parser_message_state", "..\test\parser_message_state.vcxproj", "{F5969B74-1553-4C09-98A1-8ECF752A63CA}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "basic_request", "..\test\basic_request.vcxproj", "{FF887EFE-E03B-4303-A64F-5F79DA37568B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "basic_response", "..\test\basic_response.vcxproj", "{1387D29B-00BB-4553-82A9-CFCA0604345C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,6 +23,14 @@ Global
 		{F5969B74-1553-4C09-98A1-8ECF752A63CA}.Debug|Win32.Build.0 = Debug|Win32
 		{F5969B74-1553-4C09-98A1-8ECF752A63CA}.Release|Win32.ActiveCfg = Release|Win32
 		{F5969B74-1553-4C09-98A1-8ECF752A63CA}.Release|Win32.Build.0 = Release|Win32
+		{FF887EFE-E03B-4303-A64F-5F79DA37568B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FF887EFE-E03B-4303-A64F-5F79DA37568B}.Debug|Win32.Build.0 = Debug|Win32
+		{FF887EFE-E03B-4303-A64F-5F79DA37568B}.Release|Win32.ActiveCfg = Release|Win32
+		{FF887EFE-E03B-4303-A64F-5F79DA37568B}.Release|Win32.Build.0 = Release|Win32
+		{1387D29B-00BB-4553-82A9-CFCA0604345C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1387D29B-00BB-4553-82A9-CFCA0604345C}.Debug|Win32.Build.0 = Debug|Win32
+		{1387D29B-00BB-4553-82A9-CFCA0604345C}.Release|Win32.ActiveCfg = Release|Win32
+		{1387D29B-00BB-4553-82A9-CFCA0604345C}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -39,16 +39,10 @@ public:
         segment_nz_nc %= qi::raw[
             +(unreserved | pct_encoded | sub_delims | qi::char_("@"))
         ];
-
-        // path-empty = 0<pchar>
-        path_empty %= qi::eps;
     }
 
     boost::spirit::qi::rule<Iterator, string_type()>
         segment, segment_nz, segment_nz_nc;
-
-    boost::spirit::qi::rule<Iterator, string_type()>
-        path_empty;
 };
 
 }

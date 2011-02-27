@@ -9,8 +9,8 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef URI_AUTHORITY_GRAMMAR
-#define URI_AUTHORITY_GRAMMAR
+#ifndef URI_AUTHORITY_GRAMMAR_HPP
+#define URI_AUTHORITY_GRAMMAR_HPP
 
 #include <uri/basic_authority.hpp>
 #include <uri/character_rules.hpp>
@@ -58,8 +58,6 @@ public:
         // authority = [ userinfo "@" ] host [ ":" port ]
         authority %= (-(user_info >> qi::lit('@')) >> host >> -(qi::lit(':') >> qi::ushort_));
 
-        // It'd be nice to use attr_cast here instead of a dummy rule, but apparently it doesn't
-        // play nice when the embeded parser has sub-elements which expose unused_type attributes.
         start = authority.alias();
 
     }

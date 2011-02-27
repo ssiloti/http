@@ -1,5 +1,5 @@
 //
-// basic_message_parser.hpp
+// message_state.hpp
 // ~~~~~~~~~~~~~~~~~~~~~~~~
 //
 // Copyright (c) 2010 Steven Siloti (ssiloti@gmail.com)
@@ -7,8 +7,8 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef HTTP_BASIC_MESSAGE_PARSER_HPP
-#define HTTP_BASIC_MESSAGE_PARSER_HPP
+#ifndef HTTP_PARSERS_MESSAGE_STATE_HPP
+#define HTTP_PARSERS_MESSAGE_STATE_HPP
 
 #include <boost/range.hpp>
 #include <boost/logic/tribool.hpp>
@@ -16,10 +16,10 @@
 #include <vector>
 #include <utility>
 
-namespace http {
+namespace http { namespace parsers {
 
 template <typename Msg, typename InputIterator>
-class basic_message_parser
+class message_state
 {
     enum state
     {
@@ -40,7 +40,7 @@ public:
     typedef Msg message_type;
     typedef InputIterator iterator;
 
-    basic_message_parser(message_type& m)
+    message_state(message_type& m)
         : msg_(m), state_(state_init)
     {}
 
@@ -79,7 +79,7 @@ public:
                 break;
             case state_header_name:
                 if (*cur_ == ':') {
-                    // TODO: Save location for header parse call?
+                    header_sep_ = cur_;
                     state_ = state_header_value;
                 }
                 break;
@@ -99,7 +99,7 @@ public:
                 else {
                     iterator parse_end = cur_;
                     --parse_end; --parse_end;
-                    msg_.parse_header(begin, parse_end);
+                    msg_.parse_header(begin, header_sep_, parse_end);
                     begin = cur_;
                     state_ = state_header_name;
                 }
@@ -121,10 +121,10 @@ public:
 
 private:
     message_type& msg_;
-    iterator cur_;
+    iterator cur_, header_sep_;
     state state_;
 };
 
-} // namespace http
+} } // namespace parsers namespace http
 
 #endif

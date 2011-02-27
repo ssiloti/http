@@ -38,6 +38,7 @@ public:
         lf      = qi::lit('\n');
         lwsp    = *(wsp | crlf >> wsp);
         sp     %= ascii::char_(' ');
+        vchar  %= ascii::char_("\x21-\x7E");
         wsp    %= sp | htab;
     }
 
@@ -55,7 +56,7 @@ public:
     boost::spirit::qi::rule<Iterator> lwsp;           // *(WSP / CRLF WSP)
     boost::spirit::qi::byte__type octet;              // 8 bits of data
     boost::spirit::qi::rule<Iterator, char()> sp;
-    boost::spirit::qi::ascii::print_type vchar;       // visible (printing) characters
+    boost::spirit::qi::rule<Iterator, char()> vchar;  // visible (printing) characters
     boost::spirit::qi::rule<Iterator, char()> wsp;    // white space
 };
 
