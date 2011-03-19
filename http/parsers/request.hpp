@@ -11,11 +11,12 @@
 #ifndef HTTP_PARSERS_REQUEST_HPP
 #define HTTP_PARSERS_REQUEST_HPP
 
+#include <http/basic_request.hpp>
 #include <http/parsers/basic_rules.hpp>
 #include <http/parsers/version_number.hpp>
 
-#include <uri/components.hpp>
-#include <uri/absolute_uri_grammar.hpp>
+#include <uri/parsers/components.hpp>
+#include <uri/parsers/absolute_uri.hpp>
 
 #include <boost/spirit/home/qi/parse.hpp>
 #include <boost/spirit/home/qi/directive/omit.hpp>
@@ -39,12 +40,12 @@ struct basic_request<Headers, Body>::request_line_grammar
 
     parsers::basic_rules<Iterator> b;
 
-    uri::absolute_uri_grammar<Iterator, std::string> absolute_uri;
+    uri::parsers::absolute_uri<Iterator, std::string> absolute_uri;
 
-    uri::path_absolute_grammar<Iterator, std::string> path_absolute;
-    uri::query_grammar<Iterator, std::string> query;
+    uri::parsers::path_absolute<Iterator, std::string> path_absolute;
+    uri::parsers::query<Iterator, std::string> query;
 
-    uri::authority_grammar<Iterator, std::string> authority;
+    uri::parsers::authority<Iterator, std::string> authority;
 
     parsers::version_number_grammar<Iterator> version_number_g;
 
@@ -58,11 +59,12 @@ template <typename Headers, typename Body>
 template <typename InputIterator>
 bool basic_request<Headers, Body>::parse_start_line(InputIterator begin, InputIterator end)
 {
+    tuple_type request_line_tuple(method, target, this->version);
     return boost::spirit::qi::parse(
         begin,
         end,
         request_line_grammar<InputIterator>(),
-        tuple_type(method, target, version)
+        request_line_tuple
     );
 }
 

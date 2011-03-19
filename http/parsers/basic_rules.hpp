@@ -48,31 +48,22 @@ public:
     {
         using namespace boost::spirit;
 
-        ows = *(-obs_fold >> wsp);
-        rws = +(-obs_fold >> wsp);
+        ows = *(-obs_fold >> this->wsp);
+        rws = +(-obs_fold >> this->wsp);
         bws = ows;
-        obs_fold = crlf;
+        obs_fold = this->crlf;
 
-        special %= ascii::char_("()<>@,;:\\/[]?={}") | dquote;
-        tchar   %= vchar - special;
+        special %= ascii::char_("()<>@,;:\\/[]?={}") | this->dquote;
+        tchar   %= this->vchar - special;
 
-        quoted_string %= lexeme[dquote >> *(qdtext | quoted_pair) >> dquote];
+        quoted_string %= lexeme[this->dquote >> *(qdtext | quoted_pair) >> this->dquote];
         token         %= lexeme[+tchar];
         word          %= token | quoted_string;
         // Switched from ows to (-obs_fold >> wsp) to avoid sythesizing
         // a vector attribute. quoted_string takes care of the empty case.
-        qdtext        %= (-obs_fold >> wsp) | (vchar - dquote - '\\') | obs_text;
+        qdtext        %= (-obs_fold >> this->wsp) | (this->vchar - this->dquote - '\\') | obs_text;
         obs_text      %= ascii::char_("\x80-\xFF");
-        quoted_pair   %= lexeme['\\' >> (wsp | vchar | obs_text)];
-
-        comment %= '(' >> *(ctext_or_quoted_cpair | comment) >> ')';
-        // Use a separate rule so we can adapt the std::vector<char> into an std::string
-        // Qi can't adapt variant<std::vector<char>, B> to variant<std::string, B>
-        ctext_or_quoted_cpair %= *(ctext | quoted_cpair);
-        quoted_cpair %= '\\' >> (wsp | vchar | obs_text);
-        // Switched from ows to (-obs_fold >> wsp) to avoid sythesizing
-        // a vector attribute. ctext_or_quoted_cpair takes care of the empty case.
-        ctext %= (-obs_fold >> wsp) | (vchar - '(' - ')' - '\\') | obs_text;
+        quoted_pair   %= lexeme['\\' >> (this->wsp | this->vchar | obs_text)];
     }
 
     skipper_type skipper;
@@ -92,18 +83,6 @@ public:
     boost::spirit::qi::rule<iterator, char()> qdtext;
     boost::spirit::qi::rule<iterator, char()> obs_text;
     boost::spirit::qi::rule<iterator, char()> quoted_pair;
-
-    // Defined in ietf-httpbis-p1-messaging-12, Section 3.2
-    boost::spirit::qi::rule<iterator, std::vector<
-        boost::make_recursive_variant<
-            std::string, std::vector<boost::recursive_variant_>
-            >::type>()
-        > comment;
-    // ctext_or_quoted_cpair is non-standard, it is needed to synthesize the
-    // the desired attribute from comment
-    boost::spirit::qi::rule<iterator, std::string()> ctext_or_quoted_cpair;
-    boost::spirit::qi::rule<iterator, char()> quoted_cpair;
-    boost::spirit::qi::rule<iterator, char()> ctext;
 };
 
 } } // namespace parsers namespace http

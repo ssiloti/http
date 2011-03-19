@@ -26,6 +26,12 @@ public:
     template <typename InputIterator>
     bool parse_header(InputIterator begin, InputIterator sep, InputIterator end);
 
+    void clear()
+    {
+        headers.clear();
+        body.clear();
+    }
+
     version_number version;
     headers_type headers;
     entity_body_type body;

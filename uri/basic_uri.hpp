@@ -9,8 +9,6 @@
 
 #include <uri/basic_authority.hpp>
 
-//#include <boost/range.hpp>
-
 namespace uri {
 
 class invalid_uri : public std::exception

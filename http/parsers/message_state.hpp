@@ -13,6 +13,7 @@
 #include <boost/range.hpp>
 #include <boost/logic/tribool.hpp>
 
+#include <iostream>
 #include <vector>
 #include <utility>
 
@@ -43,6 +44,11 @@ public:
     message_state(message_type& m)
         : msg_(m), state_(state_init)
     {}
+
+    void reset()
+    {
+        state_ = state_init;
+    }
 
     boost::tribool parse(iterator& begin, iterator end)
     {
@@ -101,12 +107,18 @@ public:
                     --parse_end; --parse_end;
                     msg_.parse_header(begin, header_sep_, parse_end);
                     begin = cur_;
-                    state_ = state_header_name;
+                    if (*cur_ == '\r')
+                        state_ = state_header_final_cr;
+                    else
+                        state_ = state_header_start;
                 }
                 break;
             case state_header_final_cr:
-                if (*cur_ == '\n')
+                if (*cur_ == '\n') {
                     state_ = state_body;
+                    begin = ++cur_;
+                    return true;
+                }
                 else
                     return false;
                 break;

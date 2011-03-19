@@ -11,10 +11,15 @@
 #ifndef HTTP_HEADERS_HPP
 #define HTTP_HEADERS_HPP
 
+#include <http/media_type.hpp>
+#include <http/comment.hpp>
+
 #include <uri/basic_uri.hpp>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
+#include <boost/fusion/container/map.hpp>
+#include <boost/fusion/algorithm/transformation/join.hpp>
 #include <boost/fusion/support/pair.hpp>
 #include <boost/mpl/string.hpp>
 
@@ -28,18 +33,6 @@
 
 namespace http {
 namespace headers {
-
-template <typename Header>
-void clear_header(Header& header)
-{
-    header.second.clear();
-}
-
-typedef std::vector<
-        boost::make_recursive_variant<
-            std::string, std::vector<boost::recursive_variant_>
-            >::type
-> comment_type;
 
 struct host_type
 {
@@ -55,16 +48,28 @@ struct entity_tag_type
 
 struct product_type
 {
+    void clear()
+    {
+        product.clear();
+        version.clear();
+    }
+
     std::string product, version;
 };
 
-struct media_type_type
-{
-    std::string type, subtype;
-    std::map<std::string, std::string> parameters;
-};
-
 struct asterisk {};
+
+template <typename Header>
+void clear_header(Header& header)
+{
+    header.second.clear();
+}
+
+template <typename Name>
+void clear_header(boost::fusion::pair<Name, boost::posix_time::ptime>& header)
+{
+    header.second = boost::posix_time::not_a_date_time;
+}
 
 // General headers
 
@@ -93,7 +98,7 @@ struct via_intermediary
 {
     struct protocol_t { std::string name, version; } received_protocol;
     host_type received_by;
-    comment_type comment;
+    http::comment comment;
 };
 typedef boost::fusion::pair<boost::mpl::string<'via'>,
         std::vector<via_intermediary> > via;
@@ -115,7 +120,7 @@ typedef boost::fusion::pair<boost::mpl::string<'mime', '-ver', 'sion'>,
 
 struct accept_value
 {
-    media_type_type media_range;
+    http::media_type media_range;
     struct params_t {
         float qvalue;
         std::map<std::string, std::string> ext;
@@ -206,8 +211,14 @@ typedef boost::fusion::pair<boost::mpl::string<'te'>,
 
 struct user_agent_value
 {
+    void clear()
+    {
+        product.clear();
+        details.clear();
+    }
+
     product_type product;
-    std::vector<boost::variant<product_type, comment_type> > details;
+    std::vector<boost::variant<product_type, http::comment> > details;
 };
 typedef boost::fusion::pair<boost::mpl::string<'user', '-age', 'nt'>,
         user_agent_value> user_agent;
@@ -287,13 +298,16 @@ typedef boost::fusion::pair<boost::mpl::string<'cont', 'ent-', 'loca', 'tion'>,
         uri::basic_uri<std::string> > content_location;
 
 typedef boost::fusion::pair<boost::mpl::string<'cont', 'ent-', 'type'>,
-        media_type_type> content_type;
+        http::media_type> content_type;
 
 typedef boost::fusion::pair<boost::mpl::string<'expi', 'res'>,
         boost::posix_time::ptime> expires;
 
 typedef boost::fusion::pair<boost::mpl::string<'last', '-mod', 'ifie', 'd'>,
         boost::posix_time::ptime> last_modified;
+
+
+typedef boost::fusion::map<content_length, content_type> map;
 
 } } // namespace headers namespace http
 

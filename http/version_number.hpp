@@ -12,10 +12,15 @@
 
 #include <boost/fusion/include/adapt_struct.hpp>
 
+// macros named major and minor, really glibc, really?
+#undef major
+#undef minor
+
 namespace http {
 
 struct version_number
 {
+    version_number(unsigned int maj=1, unsigned int min=1) : major(maj), minor(min) {}
     unsigned int major, minor;
 };
 

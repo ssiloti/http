@@ -2,7 +2,7 @@
 // status_code.hpp
 // ~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2010 Steven Siloti (ssiloti@gmail.com)
+// Copyright (c) 2011 Steven Siloti (ssiloti@gmail.com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -19,6 +19,15 @@ enum status_code {
     status_bad_request          = 400,
     status_internal_server_error= 500,
 };
+
+#if 0
+const struct
+{
+    status_code status;
+    const char* reason;
+} reason_map[] =
+{{status_continue, "Continue"}};
+#endif
 
 } // namespace http
 

@@ -37,7 +37,7 @@ private:
     typedef boost::fusion::tuple<
         std::string&,
         target_type&,
-        version_number_type&
+        typename basic_message<Headers, Body>::version_number_type&
     > tuple_type;
 
     template <typename Iterator>
@@ -49,6 +49,13 @@ private:
 public:
     template <typename InputIterator>
     bool parse_start_line(InputIterator begin, InputIterator end);
+
+    void clear()
+    {
+        basic_message<Headers, Body>::clear();
+        method.clear();
+        target = asterisk();
+    }
 
     std::string method;
     target_type target;

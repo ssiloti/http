@@ -13,6 +13,8 @@
 
 #include <http/headers.hpp>
 
+#include <http/generators/media_type.hpp>
+
 #include <boost/spirit/include/karma_generate_auto.hpp>
 #include <boost/spirit/home/karma/numeric.hpp>
 #include <boost/spirit/home/karma/string.hpp>
@@ -33,15 +35,21 @@ bool generate_header(const headers::allow& header, OutputIterator& sink)
     return boost::spirit::karma::generate(sink, boost::spirit::karma::string % ',', header.second);
 }
 
+template <typename OutputIterator>
+bool generate_header(const headers::content_type& header, OutputIterator& sink)
+{
+    return boost::spirit::karma::generate(sink, media_type<OutputIterator>(), header.second);
+}
+
 /*
 template <typename OutputIterator>
-bool generate_header(headers::& header, OutputIterator& sink)
+bool generate_header(const headers::& header, OutputIterator& sink)
 {
     return boost::spirit::karma::generate(sink, header.second);
 }
 
 template <typename OutputIterator>
-bool generate_header(headers::& header, OutputIterator& sink)
+bool generate_header(const headers::& header, OutputIterator& sink)
 {
     return boost::spirit::karma::generate(sink, header.second);
 }

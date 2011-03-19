@@ -12,14 +12,14 @@
 #define HTTP_PARSERS_HEADERS_HPP
 
 #include <http/headers.hpp>
-#include <http/basic_rules.hpp>
+#include <http/parsers/media_type.hpp>
+#include <http/parsers/basic_rules.hpp>
 
 #include <boost/spirit/include/qi_parse_auto.hpp>
 #include <boost/spirit/home/qi/numeric.hpp>
 #include <boost/spirit/home/qi/operator.hpp>
 
-namespace http {
-namespace parsers {
+namespace http { namespace parsers {
 
 template <typename Header, typename InputIterator>
 bool parse_header(Header& header, InputIterator begin, InputIterator end)
@@ -39,6 +39,13 @@ template <typename InputIterator>
 bool parse_header(headers::content_length& header, InputIterator begin, InputIterator end)
 {
     return boost::spirit::qi::parse(begin, end, header.second);
+}
+
+template <typename InputIterator>
+bool parse_header(headers::content_type& header, InputIterator begin, InputIterator end)
+{
+    basic_rules<InputIterator> b;
+    return boost::spirit::qi::phrase_parse(begin, end, media_type<InputIterator>(), b.skipper, header.second);
 }
 
 /*

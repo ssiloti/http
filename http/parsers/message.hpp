@@ -15,13 +15,18 @@
 
 namespace http {
 
-template <typename Headers, typename Body, typename InputIterator>
+template <typename Headers, typename Body>
+template <typename InputIterator>
 bool basic_message<Headers, Body>::parse_header(InputIterator begin, InputIterator sep, InputIterator end)
 {
-    parsers::basic_rules<InputIterator> r;
+    parsers::basic_rules<InputIterator> b;
     std::string name;
-    boost::spirit::qi::phrase_parse(begin, sep, r.token, r.skipper, name);
-    headers.append(name, ++sep, end);
+    if (boost::spirit::qi::phrase_parse(begin, sep, b.token, b.skipper, name)) {
+        headers.append(name, ++sep, end);
+        return true;
+    }
+    else
+        return false;
 }
 
 } // namespace http

@@ -62,16 +62,16 @@ public:
     class mapped_type
     {
         template <typename OutputIterator>
-        struct serialize_visitor : public boost::static_visitor<>
+        struct generate_visitor : public boost::static_visitor<bool>
         {
-            serialize_visitor(OutputIterator s)
+            generate_visitor(OutputIterator& s)
                 : sink(s)
             {}
 
             template <typename Header>
-            void operator()(const Header& header) const
+            bool operator()(const Header& header) const
             {
-                generators::generate_header(header, sink);
+                return generators::generate_header(header, sink);
             }
 /*
             template <>
@@ -80,7 +80,7 @@ public:
                 std::copy(header.begin(), header.end(), sink);
             }
 */
-            OutputIterator sink;
+            OutputIterator& sink;
         };
 
         template <typename InputIterator>
@@ -124,7 +124,7 @@ public:
                 parsers::parse_header(header, begin_, end_);
             }
 
-            template <>
+ //           template <>
             void operator()(headers::unknown& header) const
             {
                 if (!header.second.empty())
@@ -182,9 +182,9 @@ public:
         }
 
         template <typename OutputIterator>
-        void serialize(OutputIterator sink) const
+        bool generate(OutputIterator& sink) const
         {
-            boost::apply_visitor(serialize_visitor<OutputIterator>(sink), var_);
+            return boost::apply_visitor(generate_visitor<OutputIterator>(sink), var_);
         }
 
         void clear()
@@ -195,7 +195,7 @@ public:
         std::string to_string() const
         {
             std::string value;
-            boost::apply_visitor(serialize_visitor<std::back_insert_iterator<std::string> >(std::back_inserter(value)), var_);
+            boost::apply_visitor(generate_visitor<std::back_insert_iterator<std::string> >(std::back_inserter(value)), var_);
             return value;
         }
 
@@ -230,7 +230,7 @@ private:
         using namespace boost;
 
         typedef typename mpl::deref<First>::type item_type;
-        if (name == mpl::c_str<item_type::first_type>::value)
+        if (name == mpl::c_str<typename item_type::first_type>::value)
             return item_type();
         else
             return variant_from_name<typename mpl::next<First>::type, Last>(
@@ -244,8 +244,8 @@ private:
         using namespace boost;
 
         return variant_from_name<
-            mpl::begin<known_headers_type>::type,
-            mpl::end<known_headers_type>::type
+            typename mpl::begin<known_headers_type>::type,
+            typename mpl::end<known_headers_type>::type
             >(
             name,
             is_same<typename mpl::begin<known_headers_type>::type,
@@ -302,7 +302,7 @@ public:
     template <typename Header>
     typename Header::second_type& at()
     {
-        return boost::get<typename Header>(
+        return boost::get<Header>(
             headers_.insert(
                 std::make_pair(
                     boost::mpl::c_str<typename Header::first_type>::value,
@@ -313,9 +313,9 @@ public:
     }
 
     template <typename Header>
-    typename const Header::second_type& at() const
+    const typename Header::second_type& at() const
     {
-        return boost::get<typename Header>(
+        return boost::get<Header>(
             headers_.insert(
                 std::make_pair(
                     boost::mpl::c_str<typename Header::first_type>::value,
@@ -323,6 +323,11 @@ public:
                     )
                 ).first->second.var_
             ).second;
+    }
+
+    void clear()
+    {
+        headers_.clear();
     }
 
 private:

@@ -24,7 +24,7 @@ class basic_response : public basic_message<Headers, Body>
 {
 private:
     typedef boost::fusion::tuple<
-        version_number_type&,
+        typename basic_message<Headers, Body>::version_number_type&,
         status_code&,
         std::string&
     > tuple_type;
@@ -36,8 +36,15 @@ private:
     friend struct status_line_grammar;
 
 public:
+    basic_response()
+        : status(status_ok), reason("OK")
+    {}
+
     template <typename InputIterator>
     bool parse_start_line(InputIterator begin, InputIterator end);
+
+    template <typename OutputIterator>
+    bool generate_start_line(OutputIterator sink) const;
 
     status_code status;
     std::string reason;
