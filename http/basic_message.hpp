@@ -19,8 +19,9 @@ template <typename Headers, typename Body>
 class basic_message
 {
 public:
-    typedef headers_map<Headers> headers_type;
-    typedef Body entity_body_type;
+    typedef Headers headers_type;
+    typedef Body body_type;
+    typedef headers_map<headers_type> headers_map_type;
     typedef version_number version_number_type;
 
     template <typename InputIterator>
@@ -33,8 +34,8 @@ public:
     }
 
     version_number version;
-    headers_type headers;
-    entity_body_type body;
+    headers_map_type headers;
+    body_type body;
 };
 
 }

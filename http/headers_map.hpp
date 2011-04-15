@@ -24,6 +24,7 @@
 
 #include <boost/variant/variant.hpp>
 #include <boost/variant/apply_visitor.hpp>
+#include <boost/optional.hpp>
 
 #include <boost/type_traits/is_same.hpp>
 
@@ -312,12 +313,35 @@ public:
             ).second;
     }
 
+    template <typename Header>
+    boost::optional<const typename Header::second_type&> maybe_at() const
+    {
+        return maybe_at_helper<Header>(boost::mpl::contains<ref_types, Header>());
+    }
+
     void clear()
     {
         headers_.clear();
     }
 
 private:
+    template <typename Header>
+    boost::optional<const typename Header::second_type&> maybe_at_helper(boost::mpl::true_) const
+    {
+        const_iterator header = headers_.find(boost::mpl::c_str<typename Header::first_type>::value);
+
+        if (header != headers_.end())
+            return boost::optional<const typename Header::second_type&>(boost::get<Header>(header->second.var_).second);
+        else
+            return boost::optional<const typename Header::second_type&>();
+    }
+
+    template <typename Header>
+    boost::optional<const typename Header::second_type&> maybe_at_helper(boost::mpl::false_) const
+    {
+        return boost::optional<const typename Header::second_type&>();
+    }
+
     base_type headers_;
 };
 

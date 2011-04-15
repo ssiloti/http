@@ -83,9 +83,9 @@ bool generate_message(OutputIterator& sink, const Msg& msg)
     if (!msg.generate_start_line(sink))
         return false;
 
-    boost::fusion::for_each(content_headers, detail::generate_aux_headers<typename Msg::headers_type, OutputIterator>(msg.headers, sink));
+    boost::fusion::for_each(content_headers, detail::generate_aux_headers<typename Msg::headers_map_type, OutputIterator>(msg.headers, sink));
 
-    for (typename Msg::headers_type::const_iterator header(msg.headers.begin());
+    for (typename Msg::headers_map_type::const_iterator header(msg.headers.begin());
         header != msg.headers.end();
         ++header)
     {

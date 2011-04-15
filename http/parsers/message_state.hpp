@@ -10,6 +10,8 @@
 #ifndef HTTP_PARSERS_MESSAGE_STATE_HPP
 #define HTTP_PARSERS_MESSAGE_STATE_HPP
 
+#include <boost/asio/buffer.hpp>
+
 #include <boost/range.hpp>
 #include <boost/logic/tribool.hpp>
 
@@ -42,7 +44,7 @@ public:
     typedef InputIterator iterator;
 
     message_state(message_type& m)
-        : msg_(m), state_(state_init)
+        : msg_(m), state_(state_init), content_length_remaining_(std::numeric_limits<std::size_t>::max())
     {}
 
     void reset()
@@ -55,7 +57,7 @@ public:
         return state_ != state_init;
     }
 
-    boost::tribool parse(iterator& begin, iterator end)
+    boost::tribool parse_headers(iterator& begin, iterator end)
     {
         if (state_ == state_init)
         {
@@ -122,11 +124,13 @@ public:
                 if (*cur_ == '\n') {
                     state_ = state_body;
                     begin = ++cur_;
-                    return true;
+                    return get_content_length();
                 }
                 else
                     return false;
                 break;
+            case state_body:
+                return true;
             default:
                 return false;
                 break;
@@ -135,10 +139,41 @@ public:
         return boost::indeterminate;
     }
 
+    std::vector<boost::asio::mutable_buffer> parse_body(boost::asio::const_buffer received)
+    {
+        if (content_length_remaining_ != std::numeric_limits<std::size_t>::max())
+        {
+            content_length_remaining_ -= boost::asio::buffer_size(received);
+        }
+
+        return body_parser_.parse_body(msg_, received, content_length_remaining_);
+    }
+
+    std::size_t body_length_remaining()
+    {
+        return content_length_remaining_;
+    }
 
 private:
+    bool get_content_length()
+    {
+        boost::optional<const std::size_t&> maybe_length = msg_.headers.maybe_at<headers::content_length>();
+
+        if (maybe_length)
+        {
+            content_length_remaining_ = *maybe_length;
+            return content_length_remaining_ != std::numeric_limits<std::size_t>::max();
+        }
+        else
+        {
+            return true;
+        }
+    }
+
     message_type& msg_;
     iterator cur_, header_sep_;
+    body_parser<typename message_type::headers_type, typename message_type::body_type> body_parser_;
+    std::size_t content_length_remaining_;
     state state_;
 };
 

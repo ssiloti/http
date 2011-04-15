@@ -14,7 +14,7 @@
 #include <http/basic_response.hpp>
 #include <http/headers.hpp>
 
-#include <string>
+#include <vector>
 
 namespace http {
 

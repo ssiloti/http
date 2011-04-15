@@ -54,7 +54,7 @@ public:
     boost::spirit::qi::rule<Iterator, char()> htab;   // horizontal tab
     boost::spirit::qi::rule<Iterator> lf;             // linefeed
     boost::spirit::qi::rule<Iterator> lwsp;           // *(WSP / CRLF WSP)
-    boost::spirit::qi::byte__type octet;              // 8 bits of data
+    boost::spirit::qi::byte_type octet;              // 8 bits of data
     boost::spirit::qi::rule<Iterator, char()> sp;
     boost::spirit::qi::rule<Iterator, char()> vchar;  // visible (printing) characters
     boost::spirit::qi::rule<Iterator, char()> wsp;    // white space

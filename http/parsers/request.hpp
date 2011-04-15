@@ -20,6 +20,7 @@
 
 #include <boost/spirit/home/qi/parse.hpp>
 #include <boost/spirit/home/qi/directive/omit.hpp>
+#include <boost/fusion/include/std_pair.hpp>
 
 namespace http {
 

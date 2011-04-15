@@ -11,6 +11,7 @@
 #define URI_BASIC_AUTHORITY_HPP
 
 #include <boost/spirit/home/qi/domain.hpp>
+#include <boost/spirit/home/karma/domain.hpp>
 //#include <boost/spirit/home/support/attributes.hpp>
 
 #include <boost/fusion/tuple/tuple_tie.hpp>
@@ -73,6 +74,16 @@ struct authority_tuple
     > type;
 };
 
+template <typename String>
+struct const_authority_tuple
+{
+    typedef boost::fusion::tuple<
+        const boost::optional<String>&,
+        const String&,
+        const boost::optional<boost::uint16_t>&
+    > type;
+};
+
 } // namespace detail
 
 } // namespace uri
@@ -100,6 +111,25 @@ struct transform_attribute<
     static void post(uri::basic_authority<String>&, type const&) { }
 
     static void fail(uri::basic_authority<String>& val) { }
+};
+
+template <typename String>
+struct transform_attribute<
+    const uri::basic_authority<String>,
+    typename uri::detail::const_authority_tuple<String>::type,
+    boost::spirit::karma::domain
+>
+{
+    typedef typename uri::detail::const_authority_tuple<String>::type type;
+
+    static type pre(const uri::basic_authority<String>& exposed)
+    {
+        return type(
+                exposed.userinfo,
+                exposed.host,
+                exposed.port
+            );
+    }
 };
 
 } } } // namespace traits namespace spirit namespace boost

@@ -1,5 +1,5 @@
 //
-// async_server_connection.hpp
+// async_connection.hpp
 // ~~~~~~~~~~~~~~~~~~~~~~~~
 //
 // Copyright (c) 2011 Steven Siloti (ssiloti@gmail.com)
@@ -7,51 +7,66 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-#ifndef HTTP_ASYNC_SERVER_CONNECTION_HPP
-#define HTTP_ASYNC_SERVER_CONNECTION_HPP
+#ifndef HTTP_ASYNC_CONNECTION_HPP
+#define HTTP_ASYNC_CONNECTION_HPP
 
-#include <http/basic_request.hpp>
-
-#include <http/parsers/message_state.hpp>
-
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/asio/write.hpp>
-#include <boost/asio/read.hpp>
+#include <boost/asio/io_service.hpp>
 #include <boost/asio/buffer.hpp>
-#include <boost/asio/placeholders.hpp>
+#include <boost/asio/read.hpp>
 
+#include <boost/enable_shared_from_this.hpp>
 #include <boost/bind.hpp>
+#include <boost/variant.hpp>
 #include <boost/function.hpp>
-#include <boost/variant/variant.hpp>
-
-#include <boost/smart_ptr/enable_shared_from_this.hpp>
-
-#include <boost/noncopyable.hpp>
-
 #include <boost/array.hpp>
-#include <boost/cstdint.hpp>
 
-#include <deque>
 #include <vector>
-#include <algorithm>
-#include <iterator>
+#include <deque>
 
 namespace http {
 
-namespace ip = boost::asio::ip;
-namespace placeholders = boost::asio::placeholders;
-
-template <typename Headers, typename Body>
-class async_server_connection : public boost::enable_shared_from_this<async_server_connection<Headers, Body> >
+std::size_t memcpyv(std::vector<boost::asio::mutable_buffer>& dest, boost::asio::const_buffer src)
 {
-    typedef async_server_connection<Headers, Body> this_type;
+    std::vector<boost::asio::mutable_buffer>::iterator begin = dest.begin();
+    std::size_t source_bytes = boost::asio::buffer_size(src);
+    while (begin != dest.end()) {
+        std::size_t consumed = std::min(boost::asio::buffer_size(src), boost::asio::buffer_size(*begin));
+        std::memcpy(boost::asio::buffer_cast<void*>(*begin),
+                    boost::asio::buffer_cast<const void*>(src),
+                    consumed);
+        src = src + consumed;
+        if (consumed == boost::asio::buffer_size(*begin)) {
+            ++begin;
+        }
+        else {
+            (*begin) = (*begin) + consumed;
+            break;
+        }
+    }
+
+    dest.erase(dest.begin(), begin);
+    return source_bytes - boost::asio::buffer_size(src);
+}
+
+template <typename Stream>
+class async_connection : public boost::enable_shared_from_this<async_connection<Stream> >
+{
+    typedef async_connection<Stream> this_type;
+    enum read_destination { dest_recv_buffer, dest_external_buffer };
+
+public:
+    typedef Stream stream_type;
+//    typedef boost::remove_reference< Stream >::type next_layer_type;
+//    typedef next_layer_type::lowest_layer_type lowest_layer_type;
+
+    stream_type& next_layer() { return socket_; }
+
+protected:
+    typedef std::vector<boost::uint8_t> send_buffer_t;
+    typedef std::deque<boost::function<void()> > send_queue_t;
 
     static const int recv_buffer_size = 1024 * 16;
-
-    typedef std::vector<boost::uint8_t> send_buffer_t;
     typedef boost::array<boost::uint8_t, recv_buffer_size> recv_buffer_t;
-
-    typedef std::deque<boost::function<void()> > send_queue_t;
 
     struct generation_state
     {
@@ -81,26 +96,18 @@ class async_server_connection : public boost::enable_shared_from_this<async_serv
         send_buffer_t scratch_buffer;
     };
 
-public:
-    typedef basic_request<Headers, Body> request_type;
-
-public:
-    struct context_type
+    async_connection(boost::asio::io_service& io_service)
+        : socket_(io_service)
+        , valid_begin_(recv_buffer_.begin())
+        , valid_end_(recv_buffer_.begin())
     {
-        context_type(
-            boost::shared_ptr<this_type> con,
-            const request_type& req)
-            : connection(con), request(req)
-        {}
+    }
 
-        boost::shared_ptr<this_type> connection;
-        const request_type& request;
-    };
-
+public:
     friend class generation_iterator;
     struct generation_iterator : public std::iterator<std::output_iterator_tag, boost::uint8_t>
     {
-        friend class async_server_connection<Headers, Body>;
+        friend class async_connection<Stream>;
         typedef typename std::vector<typename generation_state::pushed_buffer>::size_type buffer_handle;
         typedef typename generation_state::scratch_region scratch_region;
 
@@ -199,102 +206,45 @@ public:
         generation_state& state_;
     };
 
-public:
-    typedef typename recv_buffer_t::const_iterator parse_iterator_type;
-
-    template <typename Handler>
-    async_server_connection(ip::tcp::acceptor& acceptor, Handler handler)
-        : socket_(acceptor.get_io_service())
-        , valid_begin_(recv_buffer_.begin())
-        , valid_end_(recv_buffer_.begin())
-        , active_request_state_(active_request_)
-    {
-        acceptor.async_accept(socket_, handler);
-    }
-
-    bool is_open() { return socket_.is_open(); }
-    const std::string& remote_host_name() { return remote_host_name_; }
-
-    void close() { socket_.close(); }
-
-    template <typename Handler>
-    void read_request(Handler handler)
-    {
-        active_request_.clear();
-        read_request(boost::system::error_code(), 0, handler);
-    }
-
-    template <typename Handler>
-    void read_request_body(std::vector<boost::asio::mutable_buffer> buffers, Handler handler)
-    {
-        std::vector<boost::asio::mutable_buffer>::iterator begin = buffers.begin();
-        std::size_t vaid_bytes = valid_end_ - valid_begin_;
-        while (begin != buffers.end()) {
-            std::size_t consumed = std::min(vaid_bytes, boost::asio::buffer_size(*begin));
-            std::memcpy(boost::asio::buffer_cast<void*>(*begin),
-                        static_cast<const void*>(&*valid_begin_),
-                        consumed);
-            valid_begin_ += consumed;
-            if (consumed == boost::asio::buffer_size(*begin))
-                ++begin;
-            else {
-                (*begin) = (*begin) + consumed;
-                break;
-            }
-        }
-
-        if (begin != buffers.end()) {
-            buffers.erase(buffers.begin(), begin);
-            boost::asio::async_read(socket_, buffers, handler);
-        }
-        else {
-            handler(boost::system::error_code(), 0);
-        }
-    }
-
-    template <typename Response>
-    void write_response(Response response)
-    {
-        active_request_state_.reset();
-        send_queue_.push_back(
-            boost::bind(
-                &this_type::write_next_response<Response>,
-                this,
-                response
-            )
-        );
-        
-        if (send_queue_.size() == 1)
-            send_queue_.back()();
-    }
-
 protected:
-    template <typename Handler>
-    void read_request(const boost::system::error_code& error,
+    generation_iterator start_generation()
+    {
+        send_buffer_.clear();
+        return generation_iterator(send_buffer_);
+    }
+
+    std::vector<boost::asio::const_buffer> vectorize(generation_iterator iter)
+    {
+        return iter.iovec();
+    }
+
+    template <typename State, typename Handler>
+    void read_message(const boost::system::error_code& error,
                             std::size_t bytes_transfered,
+                            State message_state,
                             Handler handler)
     {
-        if (error) {
-//            handler(error);
-            return;
-        }
-
         valid_end_ += bytes_transfered;
-        boost::tribool complete = active_request_state_.parse_headers(valid_begin_, valid_end_);
+        boost::tribool complete = message_state->parse_headers(valid_begin_, valid_end_);
 
         if (valid_begin_ == valid_end_)
-            valid_begin_ = valid_end_ = recv_buffer_.begin();
+            reset_recv_buffer();
 
         if (complete) {
-            handler(error, context_type(this->shared_from_this(), active_request_));
+            if (message_state->body_length_remaining())
+                read_message_body(error, 0, dest_recv_buffer, message_state, handler);
+            else
+                handler(error);
+        }
+        else if (error) {
+            handler(error);
         }
         else if (!complete) {
             handler(
                 boost::system::error_code(
                     boost::system::errc::illegal_byte_sequence,
                     boost::system::generic_category()
-                ),
-                context_type(this->shared_from_this(), active_request_)
+                )
             );
         }
         else {
@@ -310,8 +260,7 @@ protected:
                         boost::system::error_code(
                             boost::system::errc::illegal_byte_sequence,
                             boost::system::generic_category()
-                        ),
-                        context_type(this->shared_from_this(), active_request_)
+                        )
                     );
                     return;
                 }
@@ -323,55 +272,68 @@ protected:
             socket_.async_read_some(
                 boost::asio::buffer(valid_end_, recv_buffer_.end() - valid_end_),
                 boost::bind(
-                    &this_type::read_request<Handler>,
+                    &this_type::read_message<State, Handler>,
                     this->shared_from_this(),
-                    placeholders::error,
-                    placeholders::bytes_transferred,
+                    boost::asio::placeholders::error,
+                    boost::asio::placeholders::bytes_transferred,
+                    message_state,
                     handler
                 )
             );
         }
     }
 
-    template <typename Response>
-    void write_next_response(Response response)
+private:
+    template <typename State, typename Handler>
+    void read_message_body(const boost::system::error_code& error,
+                           std::size_t bytes_transfered,
+                           read_destination xfer_dest,
+                           State message_state,
+                           Handler handler)
     {
-        send_buffer_.clear();
-        generation_iterator sink(send_buffer_);
-        generators::generate_message(sink, response);
-        boost::asio::async_write(
-            socket_,
-            sink.iovec(),
-            boost::bind(
-                &this_type::response_written,
-                this->shared_from_this(),
-                placeholders::error,
-                placeholders::bytes_transferred
-            )
-        );
-    }
+//        if (xfer_dest == dest_recv_buffer)
+        valid_end_ += bytes_transfered;
 
-    void response_written(const boost::system::error_code& error, std::size_t bytes_transfered)
-    {
-        if (error) {
-            socket_.close();
+        std::vector<boost::asio::mutable_buffer> external_buffers
+            = message_state->parse_body(boost::asio::const_buffer(valid_begin_, valid_end_ - valid_begin_));
+
+        reset_recv_buffer();
+
+        if (error || message_state->body_length_remaining() == 0) {
+            handler(error);
             return;
         }
 
-        send_queue_.pop_front();
-        if (!send_queue_.empty())
-            send_queue_.back()();
+        if (external_buffers.empty()) {
+            external_buffers.push_back(boost::asio::buffer(valid_end_, std::min(std::size_t(recv_buffer_.end() - valid_end_), message_state->body_length_remaining())));
+            xfer_dest = dest_recv_buffer;
+        }
+        else {
+            xfer_dest = dest_external_buffer;
+        }
+
+        boost::asio::async_read(socket_, external_buffers,
+            boost::bind(&this_type::read_message_body<State, Handler>,
+                        this->shared_from_this(),
+                        boost::asio::placeholders::error,
+                        boost::asio::placeholders::bytes_transferred,
+                        xfer_dest,
+                        message_state,
+                        handler));
     }
 
+    void reset_recv_buffer()
+    {
+        valid_begin_ = valid_end_ = recv_buffer_.begin();
+    }
 
-    request_type active_request_;
-    parsers::message_state<request_type, typename recv_buffer_t::iterator> active_request_state_;
+protected:
     recv_buffer_t recv_buffer_;
+    typename recv_buffer_t::iterator valid_begin_, valid_end_;
+
+    stream_type socket_;
     generation_state send_buffer_;
     send_queue_t send_queue_;
-    typename recv_buffer_t::iterator valid_begin_, valid_end_;
-    boost::asio::ip::tcp::socket socket_;
-    std::string remote_host_name_;
 };
 
 }

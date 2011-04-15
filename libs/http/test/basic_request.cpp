@@ -9,18 +9,20 @@
 //
 #include <http/basic_request.hpp>
 #include <http/parsers/request.hpp>
+#include <http/generators/request.hpp>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/test/included/unit_test_framework.hpp>
 
 #include <boost/mpl/map/map0.hpp>
 
+#include <iterator>
 #include <string>
 #include <vector>
 
 using boost::unit_test::test_suite;
 
-void test_request()
+void parse_request()
 {
     typedef http::basic_request<boost::mpl::map0<>, std::string> request_t;
     request_t request;
@@ -36,10 +38,24 @@ void test_request()
     BOOST_CHECK_EQUAL(request.version.minor, 1);
 }
 
+void generate_request()
+{
+    typedef http::basic_request<boost::mpl::map0<>, std::string> request_t;
+    request_t request;
+
+    request.method = "GET";
+
+    std::stringstream sink;
+
+    BOOST_CHECK(request.generate_start_line(std::ostream_iterator<char>(sink)));
+    BOOST_CHECK_EQUAL(sink.str(), std::string("GET * HTTP/1.1"));
+}
+
 test_suite* init_unit_test_suite(int, char*[])
 {
   test_suite* test = BOOST_TEST_SUITE("basic_request");
-  test->add(BOOST_TEST_CASE(&test_request));
+  test->add(BOOST_TEST_CASE(&parse_request));
+  test->add(BOOST_TEST_CASE(&generate_request));
   return test;
 }
 

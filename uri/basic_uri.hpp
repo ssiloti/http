@@ -20,14 +20,11 @@ struct basic_uri
 {
     typedef String string_type;
 
+    basic_uri() {}
+    basic_uri(string_type const& uri);
+    basic_uri(const typename string_type::value_type* uri);
+
 #if 0
-    uri_base(string_type const& uri)
-    {
-        if (!parse_uri(uri, parts_))
-            throw invalid_uri();
-    }
-
-
     basic_uri& operator=(basic_uri<string_type> other)
     {
         other.swap(*this);
@@ -87,6 +84,20 @@ struct basic_uri_tuple
     > type;
 };
 
+template <class String>
+struct const_basic_uri_tuple
+{
+    typedef String string_type;
+
+    typedef typename boost::fusion::tuple<
+        const string_type&,                   // scheme
+        const boost::optional<basic_authority<string_type> >&,
+        const string_type&,                // path
+        const boost::optional<string_type>&,  // query
+        const boost::optional<string_type>&   // fragment
+    > type;
+};
+
 }
 
 } // namespace uri
@@ -116,6 +127,26 @@ struct transform_attribute<
 
     static void post(uri::basic_uri<String>&, type const&) { }
     static void fail(uri::basic_uri<String>& val) { }
+};
+
+template <typename String>
+struct transform_attribute<
+    const uri::basic_uri<String>,
+    typename uri::detail::const_basic_uri_tuple<String>::type,
+    boost::spirit::karma::domain
+>
+{
+    typedef typename uri::detail::const_basic_uri_tuple<String>::type type;
+
+    static type pre(const uri::basic_uri<String>& exposed) {
+        return type(
+                exposed.scheme,
+                exposed.authority,
+                exposed.path,
+                exposed.query,
+                exposed.fragment
+            );
+    }
 };
 
 } // namespace traits

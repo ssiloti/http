@@ -18,14 +18,20 @@
 #include <boost/variant.hpp>
 #include <boost/optional.hpp>
 
+#include <boost/spirit/home/karma/domain.hpp>
+
 namespace http {
+
+struct asterisk
+{
+    asterisk() : c('*') {}
+    char c;
+};
 
 template <typename Headers, typename Body>
 class basic_request : public basic_message<Headers, Body>
 {
 public:
-    struct asterisk {};
-
     typedef boost::variant<
         asterisk
         , uri::basic_uri<std::string>
@@ -50,6 +56,9 @@ public:
     template <typename InputIterator>
     bool parse_start_line(InputIterator begin, InputIterator end);
 
+    template <typename OutputIterator>
+    bool generate_start_line(OutputIterator sink) const;
+
     std::map<std::string, std::string> parse_query() const;
 
     void clear()
@@ -64,5 +73,24 @@ public:
 };
 
 }
+
+namespace boost { namespace spirit { namespace traits {
+
+template <>
+struct transform_attribute<
+    const http::asterisk,
+    char,
+    boost::spirit::karma::domain
+>
+{
+    typedef char type;
+
+    static type pre(const http::asterisk& exposed) {
+        return type(exposed.c);
+    }
+};
+
+} } }
+
 
 #endif

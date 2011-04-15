@@ -11,6 +11,8 @@
 #ifndef HTTP_PARSERS_RESPONSE_HPP
 #define HTTP_PARSERS_RESPONSE_HPP
 
+#include <http/basic_response.hpp>
+
 #include <http/parsers/basic_rules.hpp>
 #include <http/parsers/version_number.hpp>
 
@@ -44,6 +46,7 @@ template <typename Headers, typename Body>
 template <typename InputIterator>
 bool basic_response<Headers, Body>::parse_start_line(InputIterator begin, InputIterator end)
 {
+    reason.clear();
     return boost::spirit::qi::parse(
         begin,
         end,

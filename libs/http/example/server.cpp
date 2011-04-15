@@ -8,9 +8,10 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include <http/async_string_server.hpp>
 #include <http/string_message.hpp>
 #include <http/generators/string_message.hpp>
+#include <http/parsers/string_message.hpp>
+#include <http/async_string_server.hpp>
 
 #include <boost/make_shared.hpp>
 
@@ -35,8 +36,9 @@ protected:
 
 int main()
 {
-    boost::asio::io_service service;
-    boost::shared_ptr<example_server> example(boost::make_shared<example_server>(boost::ref(service), boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 1234)));
+    using namespace boost::asio;
+    io_service service;
+    boost::shared_ptr<example_server> example(boost::make_shared<example_server>(boost::ref(service), ip::tcp::endpoint(ip::tcp::v4(), 1234)));
     example->start();
     service.run();
 }

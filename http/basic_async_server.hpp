@@ -31,7 +31,7 @@ public:
 
     void start()
     {
-        connections_.push_back(
+        accepting_con_ =
             boost::make_shared<connection_type>(
                 boost::ref(acceptor_),
                 boost::bind(
@@ -39,14 +39,13 @@ public:
                     this->shared_from_this(),
                     placeholders::error
                 )
-            )
-        );
+            );
 
         shutdown_sig_.connect(
             shutdown_sig_t::slot_type(
                 &connection_type::close,
-                connections_.back().get()
-            ).track(connections_.back())
+                accepting_con_.get()
+            ).track(accepting_con_)
         );
     }
 
@@ -94,7 +93,7 @@ private:
     void handle_accepted(const boost::system::error_code& error)
     {
         if (!error) {
-            connections_.back()->read_request(
+            accepting_con_->read_request(
                 boost::protect(boost::bind(
                     &basic_async_server::incoming_request,
                     this->shared_from_this(),
@@ -103,6 +102,8 @@ private:
                 ))
             );
         }
+
+        accepting_con_.reset();
 
         if (acceptor_.is_open())
             start();
@@ -116,7 +117,7 @@ private:
         incoming_request(context_type(this->shared_from_this(), ctx.connection, ctx.request));
     }
 
-    std::vector<boost::shared_ptr<connection_type> > connections_;
+    boost::shared_ptr<connection_type> accepting_con_;
     ip::tcp::acceptor acceptor_;
     shutdown_sig_t shutdown_sig_;
 };
