@@ -16,9 +16,11 @@
 #include <boost/spirit/home/qi/operator.hpp>
 #include <boost/spirit/home/qi/nonterminal/rule.hpp>
 #include <boost/spirit/home/qi/nonterminal/grammar.hpp>
+#include <boost/spirit/home/qi/parse.hpp>
+
+#include <exception>
 
 namespace http { namespace parsers {
-
 
 template <typename Iterator>
 struct media_type
@@ -40,6 +42,16 @@ struct media_type
     boost::spirit::qi::rule<Iterator, std::pair<std::string, std::string>()> parameter;
 };
 
-} }
+} // namespace parsers
+
+media_type& media_type::operator=(const std::string& str)
+{
+    std::string::const_iterator begin(str.begin());
+    if (!boost::spirit::qi::parse(begin, str.end(), parsers::media_type(), *this))
+        throw std::invalid_argument(std + " is not a valid media type");
+    return *this;
+}
+
+} // namespace http
 
 #endif
