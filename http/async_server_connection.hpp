@@ -11,7 +11,6 @@
 #define HTTP_ASYNC_SERVER_CONNECTION_HPP
 
 #include <http/basic_request.hpp>
-//#include <http/response.hpp>
 
 #include <http/parsers/message_state.hpp>
 
@@ -55,7 +54,6 @@ class async_server_connection : public boost::enable_shared_from_this<async_serv
 
 public:
     typedef basic_request<Headers, Body> request_type;
-//    typedef basic_response<Headers, Body> response_type;
 
 public:
     struct context_type
@@ -69,37 +67,6 @@ public:
         boost::shared_ptr<this_type> connection;
         const request_type& request;
     };
-
-#if 0
-    friend struct response_proxy;
-    struct response_proxy : boost::noncopyable
-    {
-        friend class this_type;
-
-        ~response_proxy()
-        {
-            if (con.send_queue_.size() == 1)
-                con.write_next_response(boost::system::error_code());
-        }
-
-        response_type& operator*()
-        {
-            return con.send_queue_.back();
-        }
-
-        response_type* operator->()
-        {
-            return &con.send_queue_.back();
-        }
-
-    private:
-        explicit response_proxy(this_type& c)
-            : con(c)
-        {}
-
-        this_type& con;
-    };
-#endif
 
     struct generation_iterator : public std::iterator<std::output_iterator_tag, boost::uint8_t>
     {

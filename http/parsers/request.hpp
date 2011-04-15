@@ -68,21 +68,6 @@ bool basic_request<Headers, Body>::parse_start_line(InputIterator begin, InputIt
     );
 }
 
-#if 0
-template <typename Headers, typename Body>
-template <typename InputIterator>
-bool basic_request<Headers, Body>::parse_start_line(InputIterator begin, InputIterator end)
-{
-    typedef basic_request<Headers, Body> request_type;
-    return boost::spirit::qi::parse(
-        begin,
-        end,
-        detail::request_line_grammar<request_type, InputIterator>(),
-        typename detail::request_tuple<request_type>::type
-            (method, target, version)
-    );
-}
-#endif
 } // namespace http
 
 #endif
