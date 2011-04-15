@@ -8,16 +8,16 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include <http/async_server.hpp>
+#include <http/async_string_server.hpp>
 #include <http/string_messages.hpp>
 
 #include <boost/make_shared.hpp>
 
-class example_server : public http::async_server
+class example_server : public http::async_string_server
 {
 public:
     example_server(boost::asio::io_service& io, boost::asio::ip::tcp::endpoint listen)
-        : http::async_server(io, listen)
+        : http::async_string_server(io, listen)
     {}
 
 protected:
