@@ -71,15 +71,9 @@ public:
             template <typename Header>
             bool operator()(const Header& header) const
             {
-                return generators::generate_header(header, sink);
+                return generators::generate_header_value(header, sink);
             }
-/*
-            template <>
-            void operator()(const headers::unknown& header) const
-            {
-                std::copy(header.begin(), header.end(), sink);
-            }
-*/
+
             OutputIterator& sink;
         };
 
@@ -98,14 +92,7 @@ public:
                 headers::clear_header(header);
                 parsers::parse_header(header, begin_, end_);
             }
-/*
-            template <>
-            void operator()(headers::unknown& header) const
-            {
-                header.clear();
-                std::copy(begin_, end_, std::back_inserter(header));
-            }
-*/
+
             iterator begin_, end_;
         };
 
@@ -333,6 +320,16 @@ public:
 private:
     base_type headers_;
 };
+
+namespace generators {
+
+template <typename Known, typename OutputIterator>
+bool generate_header_value(const typename headers_map<Known>::mapped_type& header, OutputIterator& sink)
+{
+    return header.generate(sink);
+}
+
+}
 
 }
 

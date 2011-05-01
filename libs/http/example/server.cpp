@@ -9,7 +9,8 @@
 //
 
 #include <http/async_string_server.hpp>
-#include <http/string_messages.hpp>
+#include <http/string_message.hpp>
+#include <http/generators/string_message.hpp>
 
 #include <boost/make_shared.hpp>
 
@@ -25,9 +26,7 @@ protected:
     {
         boost::shared_ptr<http::string_response> response(boost::make_shared<http::string_response>());
         response->body = "Hello, World";
-        response->headers.at<http::headers::content_length>() = response->body.size();
-        response->headers.at<http::headers::content_type>().type = "text";
-        response->headers.at<http::headers::content_type>().subtype = "plain";
+        response->headers.at<http::headers::content_type>() = "text/plain";
         ctx.connection->write_response(response);
     }
 

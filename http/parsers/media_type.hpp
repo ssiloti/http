@@ -47,8 +47,8 @@ struct media_type
 media_type& media_type::operator=(const std::string& str)
 {
     std::string::const_iterator begin(str.begin());
-    if (!boost::spirit::qi::parse(begin, str.end(), parsers::media_type(), *this))
-        throw std::invalid_argument(std + " is not a valid media type");
+    if (!boost::spirit::qi::parse(begin, str.end(), parsers::media_type<std::string::const_iterator>(), *this))
+        throw std::invalid_argument(str + " is not a valid media type");
     return *this;
 }
 

@@ -24,32 +24,32 @@ namespace http {
 namespace generators {
 
 template <typename Header, typename OutputIterator>
-bool generate_header(const Header& header, OutputIterator& sink)
+bool generate_header_value(const Header& header, OutputIterator& sink)
 {
     return boost::spirit::karma::generate(sink, header.second);
 }
 
 template <typename OutputIterator>
-bool generate_header(const headers::allow& header, OutputIterator& sink)
+bool generate_header_value(const headers::allow& header, OutputIterator& sink)
 {
     return boost::spirit::karma::generate(sink, boost::spirit::karma::string % ',', header.second);
 }
 
 template <typename OutputIterator>
-bool generate_header(const headers::content_type& header, OutputIterator& sink)
+bool generate_header_value(const headers::content_type& header, OutputIterator& sink)
 {
     return boost::spirit::karma::generate(sink, media_type<OutputIterator>(), header.second);
 }
 
 /*
 template <typename OutputIterator>
-bool generate_header(const headers::& header, OutputIterator& sink)
+bool generate_header_value(const headers::& header, OutputIterator& sink)
 {
     return boost::spirit::karma::generate(sink, header.second);
 }
 
 template <typename OutputIterator>
-bool generate_header(const headers::& header, OutputIterator& sink)
+bool generate_header_value(const headers::& header, OutputIterator& sink)
 {
     return boost::spirit::karma::generate(sink, header.second);
 }
