@@ -10,16 +10,8 @@
 #ifndef HTTP_ASYNC_SERVER_HPP
 #define HTTP_ASYNC_SERVER_HPP
 
-#include <http/parsers/headers.hpp>
-#include <http/generators/headers.hpp>
-
-#include <http/parsers/message.hpp>
-#include <http/parsers/request.hpp>
-#include <http/generators/message.hpp>
-#include <http/generators/response.hpp>
-
+#include <http/basic_server_impl.hpp>
 #include <http/basic_async_server.hpp>
-#include <http/headers.hpp>
 
 #include <string>
 
