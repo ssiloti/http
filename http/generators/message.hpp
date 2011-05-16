@@ -77,10 +77,13 @@ namespace detail {
 template <typename OutputIterator, typename Msg>
 bool generate_message(OutputIterator& sink, const Msg& msg)
 {
+    auto headers_handle = sink.precommit_buffer();
+    auto content_headers(generate_body(sink, msg.body));
+
     if (!msg.generate_start_line(sink))
         return false;
 
-    boost::fusion::for_each(get_headers(msg.body), detail::generate_aux_headers<typename Msg::headers_type, OutputIterator>(msg.headers, sink));
+    boost::fusion::for_each(content_headers, detail::generate_aux_headers<typename Msg::headers_type, OutputIterator>(msg.headers, sink));
 
     for (typename Msg::headers_type::const_iterator header(msg.headers.begin());
         header != msg.headers.end();
@@ -93,8 +96,7 @@ bool generate_message(OutputIterator& sink, const Msg& msg)
     *sink++ = '\r';
     *sink++ = '\n';
 
-    if (!generate_body(sink, msg.body))
-        return false;
+    sink.commit_buffer(headers_handle);
 
     return true;
 }

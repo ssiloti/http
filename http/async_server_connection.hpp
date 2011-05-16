@@ -22,6 +22,7 @@
 
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
+#include <boost/variant/variant.hpp>
 
 #include <boost/smart_ptr/enable_shared_from_this.hpp>
 
@@ -52,6 +53,34 @@ class async_server_connection : public boost::enable_shared_from_this<async_serv
 
     typedef std::deque<boost::function<void()> > send_queue_t;
 
+    struct generation_state
+    {
+        void clear()
+        {
+            scratch_buffer.clear();
+            pushed_size = 0;
+            buffers.clear();
+            // Put an empty buffer at the head to store the headers
+            buffers.push_back(boost::asio::const_buffer());
+        }
+
+        struct scratch_region
+        {
+            scratch_region() {}
+            scratch_region(send_buffer_t::size_type o, send_buffer_t::size_type s)
+                : offset(o), size(s)
+            {}
+
+            send_buffer_t::size_type offset, size;
+        };
+
+        typedef boost::variant<scratch_region, boost::asio::const_buffer> pushed_buffer;
+
+        std::vector<pushed_buffer> buffers;
+        send_buffer_t::size_type pushed_size;
+        send_buffer_t scratch_buffer;
+    };
+
 public:
     typedef basic_request<Headers, Body> request_type;
 
@@ -68,9 +97,12 @@ public:
         const request_type& request;
     };
 
+    friend class generation_iterator;
     struct generation_iterator : public std::iterator<std::output_iterator_tag, boost::uint8_t>
     {
         friend class async_server_connection<Headers, Body>;
+        typedef typename std::vector<typename generation_state::pushed_buffer>::size_type buffer_handle;
+        typedef typename generation_state::scratch_region scratch_region;
 
         generation_iterator& operator*()
         {
@@ -89,71 +121,75 @@ public:
 
         generation_iterator& operator=(boost::uint8_t byte)
         {
-            connection_buffer_.push_back(byte);
+            state_.scratch_buffer.push_back(byte);
             return *this;
         }
 
         generation_iterator& operator=(boost::asio::const_buffer buf)
         {
-            buffers_.push_back(pushed_buffer(connection_buffer_.size(), buf));
+            commit_buffer();
+            state_.buffers.push_back(buf);
             return *this;
         }
 
-        generation_iterator& operator=(const generation_iterator& other)
+        buffer_handle precommit_buffer()
         {
-            buffers_ = other.buffers_;
-            return *this;
+            state_.buffers.push_back(scratch_region());
+            return state_.buffers.size() - 1;
+        }
+
+        void commit_buffer()
+        {
+            if (state_.pushed_size < state_.scratch_buffer.size())
+            {
+                state_.buffers.push_back(scratch_region(state_.pushed_size, state_.scratch_buffer.size() - state_.pushed_size));
+                state_.pushed_size = state_.scratch_buffer.size();
+            }
+        }
+
+        void commit_buffer(buffer_handle handle, boost::asio::const_buffer buf)
+        {
+            state_.buffers[handle] = buf;
+        }
+
+        void commit_buffer(buffer_handle handle)
+        {
+            state_.buffers[handle] = scratch_region(state_.pushed_size, state_.scratch_buffer.size() - state_.pushed_size);
+            state_.pushed_size = state_.scratch_buffer.size();
         }
 
     private:
-        generation_iterator(send_buffer_t& b)
-            : connection_buffer_(b)
+        generation_iterator(generation_state& s)
+            : state_(s)
         {}
+
+        struct iovec_visitor : public boost::static_visitor<>
+        {
+            iovec_visitor(generation_state& s, std::vector<boost::asio::const_buffer>& r) : state_(s), ret(r) {}
+
+            void operator()(scratch_region r)
+            {
+                ret.push_back(boost::asio::const_buffer(&state_.scratch_buffer[r.offset], r.size));
+            }
+
+            void operator()(boost::asio::const_buffer buf)
+            {
+                ret.push_back(buf);
+            }
+
+        private:
+            mutable std::vector<boost::asio::const_buffer>& ret;
+            generation_state& state_;
+        };
 
         std::vector<boost::asio::const_buffer> iovec()
         {
             std::vector<boost::asio::const_buffer> ret;
-            send_buffer_t::size_type last_offset(0);
-
-            for (typename std::vector<pushed_buffer>::const_iterator buffer = buffers_.begin();
-                buffer != buffers_.end();
-                ++buffer)
-            {
-                send_buffer_t::size_type generated_bytes(buffer->offset - last_offset);
-                if (generated_bytes) {
-                    ret.push_back(
-                        boost::asio::const_buffer(
-                            &(connection_buffer_[last_offset]),
-                            generated_bytes
-                        )
-                    );
-                    last_offset += generated_bytes;
-                }
-                ret.push_back(buffer->buffer);
-            }
-
-            if (last_offset < connection_buffer_.size())
-                ret.push_back(
-                    boost::asio::const_buffer(
-                        &(connection_buffer_[last_offset]),
-                        connection_buffer_.size() - last_offset
-                    )
-                );
+            std::for_each(state_.buffers.begin(), state_.buffers.end(), boost::apply_visitor(iovec_visitor(state_, ret)));
             return ret;
         }
 
-        struct pushed_buffer
-        {
-            pushed_buffer(send_buffer_t::size_type o, boost::asio::const_buffer b)
-                : offset(o), buffer(b)
-            {}
-
-            send_buffer_t::size_type offset;
-            boost::asio::const_buffer buffer;
-        };
-
-        std::vector<pushed_buffer> buffers_;
-        send_buffer_t& connection_buffer_;
+        generation_state& state_;
     };
 
 public:
@@ -324,7 +360,7 @@ protected:
     request_type active_request_;
     parsers::message_state<request_type, typename recv_buffer_t::iterator> active_request_state_;
     recv_buffer_t recv_buffer_;
-    send_buffer_t send_buffer_;
+    generation_state send_buffer_;
     send_queue_t send_queue_;
     typename recv_buffer_t::iterator valid_begin_, valid_end_;
     boost::asio::ip::tcp::socket socket_;

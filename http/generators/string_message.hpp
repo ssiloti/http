@@ -23,16 +23,12 @@
 
 namespace http { namespace generators {
 
-boost::fusion::map<headers::content_length> get_headers(const std::string& str)
-{
-    return boost::fusion::map<headers::content_length>(headers::content_length(str.length()));
-}
-
 template <typename OutputIterator>
-bool generate_body(OutputIterator sink, const std::string& str)
+boost::fusion::map<headers::content_length> generate_body(OutputIterator sink, const std::string& str)
 {
     std::copy(str.begin(), str.end(), sink);
-    return true;
+    sink.commit_buffer();
+    return boost::fusion::map<headers::content_length>(headers::content_length(str.length()));;
 }
 
 } }
