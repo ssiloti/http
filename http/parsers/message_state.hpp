@@ -50,6 +50,11 @@ public:
         state_ = state_init;
     }
 
+    bool is_started()
+    {
+        return state_ != state_init;
+    }
+
     boost::tribool parse(iterator& begin, iterator end)
     {
         if (state_ == state_init)

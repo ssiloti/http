@@ -28,6 +28,11 @@ struct media_type
         parameters.clear();
     }
 
+    media_type() {}
+    media_type(const std::string& type, const std::string& subtype)
+        : type(type), subtype(subtype)
+    {}
+
     media_type& operator=(const std::string&);
 
     std::string type, subtype;

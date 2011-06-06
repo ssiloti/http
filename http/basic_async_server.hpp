@@ -57,7 +57,38 @@ public:
     }
 
 protected:
-    virtual void incoming_request(typename connection_type::context_type ctx) = 0;
+    struct context_type
+    {
+        context_type(
+            boost::shared_ptr<basic_async_server<Headers, Body> > serv,
+            boost::shared_ptr<const connection_type> con,
+            const typename connection_type::request_type& req)
+            : server_(serv), connection(con), request(req)
+        {}
+
+        boost::shared_ptr<const connection_type> connection;
+        const typename connection_type::request_type& request;
+
+        template <typename Response>
+        void write_response(Response response)
+        {
+            connection_type& con(*boost::const_pointer_cast<connection_type>(connection));
+            con.write_response(response);
+            con.read_request(
+                boost::protect(boost::bind(
+                    &basic_async_server<Headers, Body>::incoming_request,
+                    server_,
+                    placeholders::error,
+                    _2
+                ))
+            );
+        }
+
+    private:
+        boost::shared_ptr<basic_async_server<Headers, Body> > server_;
+    };
+
+    virtual void incoming_request(typename context_type ctx) = 0;
 
 private:
     void handle_accepted(const boost::system::error_code& error)
@@ -82,7 +113,7 @@ private:
         if (error)
             return;
 
-        incoming_request(ctx);
+        incoming_request(context_type(this->shared_from_this(), ctx.connection, ctx.request));
     }
 
     std::vector<boost::shared_ptr<connection_type> > connections_;

@@ -68,6 +68,63 @@ bool basic_request<Headers, Body>::parse_start_line(InputIterator begin, InputIt
     );
 }
 
+namespace detail
+{
+    template <typename Iterator>
+    struct query_grammar : public boost::spirit::qi::grammar<Iterator, std::map<std::string, std::string>()>
+    {
+        query_grammar() : query_grammar::base_type(query_string)
+        {
+            using namespace boost::spirit;
+
+            query_string = (+qchar >> -(qi::lit('=') >> +qchar)) % qi::lit("&:");
+            qchar = ~qi::char_("&:=");
+        }
+
+        boost::spirit::qi::rule<Iterator, std::map<std::string, std::string>()> query_string;
+        boost::spirit::qi::rule<Iterator, std::string::value_type()> qchar;
+    };
+
+    struct query_parse_visitor : public boost::static_visitor<std::map<std::string, std::string> >
+    {
+        std::map<std::string, std::string> operator()(const uri::basic_uri<std::string>& uri) const
+        {
+            if (uri.query)
+                return parse(uri.query.get());
+            else
+                return std::map<std::string, std::string>();
+        }
+
+        std::map<std::string, std::string> operator()(const boost::fusion::tuple<std::string, boost::optional<std::string> >& uri) const
+        {
+            if (boost::fusion::at_c<1>(uri))
+                return parse(boost::fusion::at_c<1>(uri).get());
+            else
+                return std::map<std::string, std::string>();
+        }
+
+        template <typename Target>
+        std::map<std::string, std::string> operator()(Target t) const
+        {
+            return std::map<std::string, std::string>();
+        }
+
+        std::map<std::string, std::string> parse(const std::string& str) const
+        {
+            std::map<std::string, std::string> ret;
+            std::string::const_iterator begin = str.begin();
+            boost::spirit::qi::parse(begin, str.end(), query_grammar<std::string::const_iterator>(), ret);
+            return ret;
+        }
+    };
+}
+
+template <typename Headers, typename Body>
+std::map<std::string, std::string> basic_request<Headers, Body>::parse_query() const
+{
+    return boost::apply_visitor(detail::query_parse_visitor(), target);
+}
+
 } // namespace http
 
 #endif

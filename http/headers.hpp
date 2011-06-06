@@ -60,13 +60,13 @@ struct product_type
 struct asterisk {};
 
 template <typename Header>
-void clear_header(Header& header)
+inline void clear_header(Header& header)
 {
     header.second.clear();
 }
 
 template <typename Name>
-void clear_header(boost::fusion::pair<Name, boost::posix_time::ptime>& header)
+inline void clear_header(boost::fusion::pair<Name, boost::posix_time::ptime>& header)
 {
     header.second = boost::posix_time::not_a_date_time;
 }
@@ -179,7 +179,7 @@ typedef boost::fusion::pair<boost::mpl::string<'max-', 'forw', 'ards'>,
         unsigned int> max_forwards;
 
 template<>
-void clear_header(max_forwards& header)
+inline void clear_header(max_forwards& header)
 {
     header.second = 0;
 }
@@ -232,7 +232,7 @@ typedef boost::fusion::pair<boost::mpl::string<'age'>,
         boost::posix_time::seconds> age;
 
 template<>
-void clear_header(age& header)
+inline void clear_header(age& header)
 {
     header.second = boost::posix_time::seconds(boost::posix_time::not_a_date_time);
 }
@@ -273,7 +273,7 @@ typedef boost::fusion::pair<boost::mpl::string<'cont', 'ent-', 'leng', 'th'>,
         std::size_t> content_length;
 
 template<>
-void clear_header(content_length& header)
+inline void clear_header(content_length& header)
 {
     header.second = 0;
 }

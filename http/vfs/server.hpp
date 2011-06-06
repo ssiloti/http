@@ -15,17 +15,17 @@
 namespace http { namespace vfs {
 
 template <typename Server>
-class server : public Server, public directory<typename Server::connection_type::context_type>
+class server : public Server, public directory<typename Server::context_type>
 {
 public:
-    typedef typename Server::connection_type::context_type context_type;
+    typedef typename Server::context_type context_type;
 
     server(boost::asio::io_service& io, boost::asio::ip::tcp::endpoint listen)
         : Server(io, listen)
     {
     }
 
-    virtual void incoming_request(typename Server::connection_type::context_type ctx)
+    virtual void incoming_request(typename Server::context_type ctx)
     {
         const std::string& path
             (boost::fusion::get<0>(boost::get<boost::fusion::tuple<std::string, boost::optional<std::string> > >(ctx.request.target)));

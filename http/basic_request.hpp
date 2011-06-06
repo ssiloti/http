@@ -41,14 +41,16 @@ private:
     > tuple_type;
 
     template <typename Iterator>
-    struct request_line_grammar;
+    friend struct request_line_grammar;
 
     template <typename Iterator>
-    friend struct request_line_grammar;
+    struct request_line_grammar;
 
 public:
     template <typename InputIterator>
     bool parse_start_line(InputIterator begin, InputIterator end);
+
+    std::map<std::string, std::string> parse_query() const;
 
     void clear()
     {

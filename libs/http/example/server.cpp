@@ -22,12 +22,12 @@ public:
     {}
 
 protected:
-    virtual void incoming_request(connection_type::context_type ctx)
+    virtual void incoming_request(http::async_string_server::context_type ctx)
     {
         boost::shared_ptr<http::string_response> response(boost::make_shared<http::string_response>());
         response->body = "Hello, World";
         response->headers.at<http::headers::content_type>() = "text/plain";
-        ctx.connection->write_response(response);
+        ctx.write_response(response);
     }
 
 };

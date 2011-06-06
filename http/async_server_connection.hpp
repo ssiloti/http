@@ -132,19 +132,26 @@ public:
             return *this;
         }
 
+        generation_iterator& operator=(const generation_iterator& o)
+        {
+            return *this;
+        }
+
         buffer_handle precommit_buffer()
         {
             state_.buffers.push_back(scratch_region());
             return state_.buffers.size() - 1;
         }
 
-        void commit_buffer()
+        send_buffer_t::size_type commit_buffer()
         {
-            if (state_.pushed_size < state_.scratch_buffer.size())
+            send_buffer_t::size_type scratch_size = state_.scratch_buffer.size() - state_.pushed_size;
+            if (scratch_size)
             {
-                state_.buffers.push_back(scratch_region(state_.pushed_size, state_.scratch_buffer.size() - state_.pushed_size));
+                state_.buffers.push_back(scratch_region(state_.pushed_size, scratch_size));
                 state_.pushed_size = state_.scratch_buffer.size();
             }
+            return scratch_size;
         }
 
         void commit_buffer(buffer_handle handle, boost::asio::const_buffer buf)
@@ -213,7 +220,6 @@ public:
     template <typename Handler>
     void read_request(Handler handler)
     {
-        active_request_state_.reset();
         active_request_.clear();
         read_request(boost::system::error_code(), 0, handler);
     }
@@ -249,6 +255,7 @@ public:
     template <typename Response>
     void write_response(Response response)
     {
+        active_request_state_.reset();
         send_queue_.push_back(
             boost::bind(
                 &this_type::write_next_response<Response>,
