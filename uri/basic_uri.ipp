@@ -18,8 +18,8 @@ namespace uri {
 template <typename String>
 basic_uri<String>::basic_uri(string_type const& uri)
 {
-	string_type::const_iterator begin = uri.begin();
-	boost::spirit::qi::parse(begin, uri.end(), parsers::generic_uri<string_type::const_iterator, string_type>(), *this);
+	typename string_type::const_iterator begin = uri.begin();
+	boost::spirit::qi::parse(begin, uri.end(), parsers::generic_uri<typename string_type::const_iterator, string_type>(), *this);
 }
 
 template <typename String>

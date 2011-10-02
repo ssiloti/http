@@ -47,11 +47,12 @@ template <typename InputIterator>
 bool basic_response<Headers, Body>::parse_start_line(InputIterator begin, InputIterator end)
 {
     reason.clear();
+    tuple_type tuple(this->version, status, reason);
     return boost::spirit::qi::parse(
         begin,
         end,
         status_line_grammar<InputIterator>(),
-        tuple_type(version, status, reason)
+        tuple
     );
 }
 

@@ -15,6 +15,7 @@
 
 #include <boost/asio/write.hpp>
 #include <boost/bind/protect.hpp>
+#include <boost/make_shared.hpp>
 
 namespace http {
 
@@ -22,6 +23,7 @@ template <typename Stream>
 class async_client_connection : public async_connection<Stream>
 {
     typedef async_client_connection<Stream> this_type;
+    typedef async_connection<Stream> base_type;
     typedef std::deque<boost::function<void()> > send_queue_t;
     typedef std::deque<boost::function<void()> > receive_queue_t;
 
@@ -67,11 +69,11 @@ private:
     {
         using namespace boost::asio;
 
-        generation_iterator sink(start_generation());
+        typename base_type::generation_iterator sink(this->start_generation());
         generators::generate_message(sink, request);
         async_write(
-            socket_,
-            vectorize(sink),
+            this->socket_,
+            this->vectorize(sink),
             boost::bind(
                 &this_type::request_written<Response, Handler>,
                 this->shared_from_this(),
@@ -90,7 +92,7 @@ private:
                          Handler handler)
     {
         if (error) {
-            socket_.close();
+            this->socket_.close();
             handler(error);
             return;
         }
@@ -117,7 +119,7 @@ private:
     {
         read_message(boost::system::error_code(),
                      0,
-                     boost::make_shared<parsers::message_state<Response, typename recv_buffer_t::iterator> >(response),
+                     boost::make_shared<parsers::message_state<Response, typename base_type::recv_buffer_t::iterator> >(response),
                      boost::protect(boost::bind(&this_type::response_read<Handler>, shared_from_this(), boost::asio::placeholders::error, handler)));
     }
 

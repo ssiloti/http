@@ -23,7 +23,7 @@ class basic_async_server : public boost::enable_shared_from_this<basic_async_ser
 {
     typedef boost::signals2::signal<void()> shutdown_sig_t;
 public:
-    typedef async_server_connection<Headers, Body> connection_type;
+    typedef async_server_connection<boost::asio::ip::tcp::socket, Headers, Body> connection_type;
 
     basic_async_server(boost::asio::io_service& io, ip::tcp::endpoint listen)
         : acceptor_(io, listen)
@@ -43,8 +43,8 @@ public:
 
         shutdown_sig_.connect(
             shutdown_sig_t::slot_type(
-                &connection_type::close,
-                accepting_con_.get()
+                boost::bind(&connection_type::lowest_layer_type::close,
+                &accepting_con_->lowest_layer())
             ).track(accepting_con_)
         );
     }

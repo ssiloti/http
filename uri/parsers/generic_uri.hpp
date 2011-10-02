@@ -26,19 +26,19 @@ struct generic_uri
     generic_uri() : generic_uri::base_type(start, "generic_uri")
     {
         uri %=
-                scheme >> ':'
-            >>  hier_part
-            >>  -('?' >> query)
-            >>  -('#' >> fragment);
+                scheme_ >> ':'
+            >>  hier_part_
+            >>  -('?' >> query_)
+            >>  -('#' >> fragment_);
 
         start %= uri.alias();
     }
 
 private:
-    scheme<Iterator, string_type> scheme;
-    hier_part<Iterator, string_type> hier_part;
-    query<Iterator, string_type> query;
-    fragment<Iterator, string_type> fragment;
+    scheme<Iterator, string_type> scheme_;
+    hier_part<Iterator, string_type> hier_part_;
+    query<Iterator, string_type> query_;
+    fragment<Iterator, string_type> fragment_;
 
     // start rule of grammar
     boost::spirit::qi::rule<Iterator, basic_uri<string_type>()> start;

@@ -41,7 +41,7 @@ bool basic_request<Headers, Body>::generate_start_line(OutputIterator sink) cons
                 | (string << buffer[-('?' << string)])
                 | uri::generators::authority<OutputIterator, std::string>())
             << ' ' << generators::version_number_grammar<OutputIterator>(),
-       boost::fusion::make_tuple(boost::cref(method), target, version));
+       boost::fusion::make_tuple(boost::cref(method), target, this->version));
 }
 
 }

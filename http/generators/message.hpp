@@ -77,7 +77,7 @@ namespace detail {
 template <typename OutputIterator, typename Msg>
 bool generate_message(OutputIterator& sink, const Msg& msg)
 {
-    auto headers_handle = sink.precommit_buffer();
+    typename OutputIterator::buffer_handle  headers_handle = sink.precommit_buffer();
     auto content_headers(generate_body(sink, msg.body));
 
     if (!msg.generate_start_line(sink))

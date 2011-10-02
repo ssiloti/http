@@ -13,12 +13,14 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/read.hpp>
+#include <boost/asio/placeholders.hpp>
 
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/bind.hpp>
 #include <boost/variant.hpp>
 #include <boost/function.hpp>
 #include <boost/array.hpp>
+#include <boost/logic/tribool.hpp>
 
 #include <vector>
 #include <deque>
@@ -55,11 +57,11 @@ class async_connection : public boost::enable_shared_from_this<async_connection<
     enum read_destination { dest_recv_buffer, dest_external_buffer };
 
 public:
-    typedef Stream stream_type;
-//    typedef boost::remove_reference< Stream >::type next_layer_type;
-//    typedef next_layer_type::lowest_layer_type lowest_layer_type;
+    typedef typename boost::remove_reference< Stream >::type next_layer_type;
+    typedef typename next_layer_type::lowest_layer_type lowest_layer_type;
 
-    stream_type& next_layer() { return socket_; }
+    next_layer_type& next_layer() { return socket_; }
+    lowest_layer_type& lowest_layer() { return socket_.lowest_layer(); }
 
 protected:
     typedef std::vector<boost::uint8_t> send_buffer_t;
@@ -199,7 +201,8 @@ public:
         std::vector<boost::asio::const_buffer> iovec()
         {
             std::vector<boost::asio::const_buffer> ret;
-            std::for_each(state_.buffers.begin(), state_.buffers.end(), boost::apply_visitor(iovec_visitor(state_, ret)));
+            iovec_visitor visitor(state_, ret);
+            std::for_each(state_.buffers.begin(), state_.buffers.end(), boost::apply_visitor(visitor));
             return ret;
         }
 
@@ -331,7 +334,7 @@ protected:
     recv_buffer_t recv_buffer_;
     typename recv_buffer_t::iterator valid_begin_, valid_end_;
 
-    stream_type socket_;
+    next_layer_type socket_;
     generation_state send_buffer_;
     send_queue_t send_queue_;
 };

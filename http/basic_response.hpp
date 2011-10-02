@@ -36,6 +36,8 @@ private:
     friend struct status_line_grammar;
 
 public:
+    static const std::size_t default_content_length = ~0;
+
     basic_response()
         : status(status_ok), reason("OK")
     {}

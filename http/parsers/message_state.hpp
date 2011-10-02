@@ -10,10 +10,13 @@
 #ifndef HTTP_PARSERS_MESSAGE_STATE_HPP
 #define HTTP_PARSERS_MESSAGE_STATE_HPP
 
+#include <http/headers.hpp>
+
 #include <boost/asio/buffer.hpp>
 
 #include <boost/range.hpp>
 #include <boost/logic/tribool.hpp>
+#include <boost/optional.hpp>
 
 #include <iostream>
 #include <vector>
@@ -44,7 +47,7 @@ public:
     typedef InputIterator iterator;
 
     message_state(message_type& m)
-        : msg_(m), state_(state_init), content_length_remaining_(std::numeric_limits<std::size_t>::max())
+        : msg_(m), state_(state_init), content_length_remaining_(message_type::default_content_length)
     {}
 
     void reset()
@@ -157,7 +160,7 @@ public:
 private:
     bool get_content_length()
     {
-        boost::optional<const std::size_t&> maybe_length = msg_.headers.maybe_at<headers::content_length>();
+        boost::optional<const std::size_t&> maybe_length = msg_.headers.template maybe_at<headers::content_length>();
 
         if (maybe_length)
         {

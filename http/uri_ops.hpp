@@ -15,7 +15,8 @@
 
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/placeholders.hpp>
-#include <boost/smart_ptr.hpp>
+//#include <boost/smart_ptr.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/lexical_cast.hpp>
 
 namespace http {
@@ -44,6 +45,7 @@ public:
 
         op->request_.method = method;
         op->request_.target = res;
+        op->request_.headers.template at<headers::content_length>() = 0;
 
         boost::asio::ip::tcp::resolver::query::flags qflags = boost::asio::ip::tcp::resolver::query::address_configured;
         std::string service(res.scheme);
@@ -64,7 +66,7 @@ private:
             // will be tried until we successfully establish a connection.
             boost::asio::ip::tcp::endpoint endpoint = *iterator;
             connection_->next_layer().async_connect(endpoint,
-                boost::bind(&this_type::handle_connect, shared_from_this(),
+                boost::bind(&this_type::handle_connect, this->shared_from_this(),
                 boost::asio::placeholders::error, ++iterator));
         }
     }
@@ -78,7 +80,7 @@ private:
             response_ = boost::make_shared<string_response>();
             connection_->write_request(request_,
                                       *response_,
-                                      boost::protect(boost::bind(&this_type::handle_response, shared_from_this(), placeholders::error)));
+                                      boost::protect(boost::bind(&this_type::handle_response, this->shared_from_this(), placeholders::error)));
         }
         else if (iterator != ip::tcp::resolver::iterator())
         {

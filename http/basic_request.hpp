@@ -39,6 +39,8 @@ public:
         , uri::basic_authority<std::string>
     > target_type;
 
+    static const std::size_t default_content_length = 0;
+
 private:
     typedef boost::fusion::tuple<
         std::string&,
