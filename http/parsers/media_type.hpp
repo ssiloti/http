@@ -17,6 +17,7 @@
 #include <boost/spirit/home/qi/nonterminal/rule.hpp>
 #include <boost/spirit/home/qi/nonterminal/grammar.hpp>
 #include <boost/spirit/home/qi/parse.hpp>
+#include <boost/fusion/include/std_pair.hpp>
 
 #include <exception>
 

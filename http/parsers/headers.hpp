@@ -29,6 +29,26 @@ bool parse_header(Header& header, InputIterator begin, InputIterator end)
 }
 
 template <typename InputIterator>
+bool parse_header(headers::cache_control& header, InputIterator begin, InputIterator end)
+{
+    basic_rules<InputIterator> b;
+    return boost::spirit::qi::phrase_parse(begin, end, (b.token >> -('=' >> (b.token | b.quoted_string))) % ',', b.skipper, header.second);
+}
+
+template <typename InputIterator>
+bool parse_header(headers::connection& header, InputIterator begin, InputIterator end)
+{
+    basic_rules<InputIterator> b;
+    return boost::spirit::qi::phrase_parse(begin, end, b.token % ',', b.skipper, header.second);
+}
+
+template <typename InputIterator>
+bool parse_header(headers::date& header, InputIterator begin, InputIterator end)
+{
+
+}
+
+template <typename InputIterator>
 bool parse_header(headers::allow& header, InputIterator begin, InputIterator end)
 {
     basic_rules<InputIterator> b;

@@ -56,7 +56,7 @@ public:
         special %= ascii::char_("()<>@,;:\\/[]?={}") | this->dquote;
         tchar   %= this->vchar - special;
 
-        quoted_string %= lexeme[this->dquote >> *(qdtext | quoted_pair) >> this->dquote];
+        quoted_string %= lexeme[lit('"') >> *(qdtext | quoted_pair) >> lit('"')];
         token         %= lexeme[+tchar];
         word          %= token | quoted_string;
         // Switched from ows to (-obs_fold >> wsp) to avoid sythesizing
