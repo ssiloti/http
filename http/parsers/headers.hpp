@@ -12,6 +12,7 @@
 #define HTTP_PARSERS_HEADERS_HPP
 
 #include <http/headers.hpp>
+#include <http/parsers/date.hpp>
 #include <http/parsers/media_type.hpp>
 #include <http/parsers/basic_rules.hpp>
 
@@ -45,7 +46,22 @@ bool parse_header(headers::connection& header, InputIterator begin, InputIterato
 template <typename InputIterator>
 bool parse_header(headers::date& header, InputIterator begin, InputIterator end)
 {
+    basic_rules<InputIterator> b;
+    return boost::spirit::qi::phrase_parse(begin, end, date_grammar<InputIterator>(), b.skipper, header.second);;
+}
 
+template <typename InputIterator>
+bool parse_header(headers::pragma& header, InputIterator begin, InputIterator end)
+{
+    basic_rules<InputIterator> b;
+    return boost::spirit::qi::phrase_parse(begin, end, (b.token >> -('=' >> (b.token | b.quoted_string))) % ',', b.skipper, header.second);
+}
+
+template <typename InputIterator>
+bool parse_header(headers::trailer& header, InputIterator begin, InputIterator end)
+{
+    basic_rules<InputIterator> b;
+    return boost::spirit::qi::phrase_parse(begin, end, b.token % ',', b.skipper, header.second);
 }
 
 template <typename InputIterator>
