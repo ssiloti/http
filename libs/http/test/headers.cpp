@@ -57,6 +57,40 @@ void test_date()
     BOOST_CHECK_EQUAL(d.second.time_of_day().seconds(), 31);
 }
 
+void test_transfer_encoding()
+{
+    headers::transfer_encoding te;
+    std::string testv_pass("token1, token2; param1=word, token3");
+    BOOST_REQUIRE(parsers::parse_header(te, testv_pass.begin(), testv_pass.end()));
+    BOOST_CHECK_EQUAL(te.second.size(), 3);
+    BOOST_CHECK(te.second.find("token1") != te.second.end());
+    BOOST_CHECK(te.second.find("token2") != te.second.end());
+    BOOST_CHECK(te.second.find("token3") != te.second.end());
+    BOOST_CHECK(te.second["token2"].find("param1") != te.second["token2"].end());
+    BOOST_CHECK_EQUAL(te.second["token2"]["param1"], std::string("word"));
+}
+
+void test_upgrade()
+{
+    headers::upgrade u;
+    std::string testv_pass("product1, product2/version2, product3");
+    BOOST_REQUIRE(parsers::parse_header(u, testv_pass.begin(), testv_pass.end()));
+    BOOST_CHECK_EQUAL(u.second.size(), 3);
+    BOOST_CHECK_EQUAL(u.second[0].product, std::string("product1"));
+    BOOST_CHECK_EQUAL(u.second[0].version.size(), 0);
+    BOOST_CHECK_EQUAL(u.second[1].product, std::string("product2"));
+    BOOST_CHECK_EQUAL(u.second[1].version, std::string("version2"));
+    BOOST_CHECK_EQUAL(u.second[2].product, std::string("product3"));
+    BOOST_CHECK_EQUAL(u.second[2].version.size(), 0);
+}
+
+void test_via()
+{
+    headers::via v;
+    std::string testv_pass("1.0 fred, 1.1 p.example.net (Apache/1.1)");
+    BOOST_REQUIRE(parsers::parse_header(v, testv_pass.begin(), testv_pass.end()));
+}
+
 void test_content_length()
 {
     headers::content_length cl;
@@ -70,13 +104,16 @@ void test_content_length()
 
 test_suite* init_unit_test_suite(int, char*[])
 {
-  test_suite* test = BOOST_TEST_SUITE("headers");
-  test->add(BOOST_TEST_CASE(&test_token_map<headers::cache_control>));
-  test->add(BOOST_TEST_CASE(&test_token_map<headers::pragma>));
-  test->add(BOOST_TEST_CASE(&test_token_vector<headers::connection>));
-  test->add(BOOST_TEST_CASE(&test_token_vector<headers::trailer>));
-  test->add(BOOST_TEST_CASE(&test_token_vector<headers::allow>));
-  test->add(BOOST_TEST_CASE(&test_date));
-  test->add(BOOST_TEST_CASE(&test_content_length));
-  return test;
+    test_suite* test = BOOST_TEST_SUITE("headers");
+    test->add(BOOST_TEST_CASE(&test_token_map<headers::cache_control>));
+    test->add(BOOST_TEST_CASE(&test_token_map<headers::pragma>));
+    test->add(BOOST_TEST_CASE(&test_token_vector<headers::connection>));
+    test->add(BOOST_TEST_CASE(&test_token_vector<headers::trailer>));
+    test->add(BOOST_TEST_CASE(&test_token_vector<headers::allow>));
+    test->add(BOOST_TEST_CASE(&test_date));
+    test->add(BOOST_TEST_CASE(&test_transfer_encoding));
+    test->add(BOOST_TEST_CASE(&test_upgrade));
+    test->add(BOOST_TEST_CASE(&test_via));
+    test->add(BOOST_TEST_CASE(&test_content_length));
+    return test;
 }

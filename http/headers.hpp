@@ -57,6 +57,43 @@ struct product_type
     std::string product, version;
 };
 
+struct via_intermediary
+{
+    struct protocol_t { std::string name, version; } received_protocol;
+    host_type received_by;
+    http::comment comment;
+};
+
+} }
+
+BOOST_FUSION_ADAPT_STRUCT(
+    http::headers::host_type,
+    (std::string, host)
+    (boost::optional<boost::uint16_t>, port)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    http::headers::product_type,
+    (std::string, product)
+    (std::string, version)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    http::headers::via_intermediary::protocol_t,
+    (std::string, name)
+    (std::string, version)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    http::headers::via_intermediary,
+    (http::headers::via_intermediary::protocol_t, received_protocol)
+    (http::headers::host_type, received_by)
+    (http::comment, comment)
+)
+
+namespace http {
+namespace headers {
+
 struct asterisk {};
 
 template <typename Header>
@@ -94,12 +131,6 @@ typedef boost::fusion::pair<boost::mpl::string<'tran', 'sfer', '-enc', 'odin', '
 typedef boost::fusion::pair<boost::mpl::string<'upgr' , 'ade'>,
         std::vector<product_type> > upgrade;
 
-struct via_intermediary
-{
-    struct protocol_t { std::string name, version; } received_protocol;
-    host_type received_by;
-    http::comment comment;
-};
 typedef boost::fusion::pair<boost::mpl::string<'via'>,
         std::vector<via_intermediary> > via;
 

@@ -12,13 +12,17 @@
 #define HTTP_PARSERS_HEADERS_HPP
 
 #include <http/headers.hpp>
+#include <http/parsers/comment.hpp>
 #include <http/parsers/date.hpp>
 #include <http/parsers/media_type.hpp>
 #include <http/parsers/basic_rules.hpp>
+#include <uri/parsers/authority.hpp>
 
 #include <boost/spirit/include/qi_parse_auto.hpp>
 #include <boost/spirit/home/qi/numeric.hpp>
 #include <boost/spirit/home/qi/operator.hpp>
+#include <boost/spirit/home/qi/directive/as.hpp>
+#include <boost/spirit/home/qi/auxiliary/attr.hpp>
 
 namespace http { namespace parsers {
 
@@ -62,6 +66,34 @@ bool parse_header(headers::trailer& header, InputIterator begin, InputIterator e
 {
     basic_rules<InputIterator> b;
     return boost::spirit::qi::phrase_parse(begin, end, b.token % ',', b.skipper, header.second);
+}
+
+template <typename InputIterator>
+bool parse_header(headers::transfer_encoding& header, InputIterator begin, InputIterator end)
+{
+    basic_rules<InputIterator> b;
+    return boost::spirit::qi::phrase_parse(begin, end, (b.token >> *(';' >> b.token >> '=' >> b.word)) % ',', b.skipper, header.second);
+}
+
+template <typename InputIterator>
+bool parse_header(headers::upgrade& header, InputIterator begin, InputIterator end)
+{
+    basic_rules<InputIterator> b;
+    return boost::spirit::qi::phrase_parse(begin, end, (b.token >> -('/' >> b.token)) % ',', b.skipper, header.second);
+}
+
+template <typename InputIterator>
+bool parse_header(headers::via& header, InputIterator begin, InputIterator end)
+{
+    using namespace boost::spirit::qi;
+
+    basic_rules<InputIterator> b;
+    uri::parsers::authority<InputIterator, std::string> a;
+    parsers::comment<InputIterator> c;
+
+    rule<InputIterator, headers::via_intermediary::protocol_t()> rp = -(as_string[b.token >> '/']) >> b.token;
+    rule<InputIterator, headers::host_type()> rb = (a.host >> -(':' >> ushort_)) | (b.token >> attr(boost::optional<boost::uint16_t>()));
+    return phrase_parse(begin, end, (rp >> rb >> -c) % ',', b.skipper, header.second);
 }
 
 template <typename InputIterator>
