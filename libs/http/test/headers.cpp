@@ -88,7 +88,39 @@ void test_via()
 {
     headers::via v;
     std::string testv_pass("1.0 fred, 1.1 p.example.net (Apache/1.1)");
-    BOOST_REQUIRE(parsers::parse_header(v, testv_pass.begin(), testv_pass.end()));
+    BOOST_CHECK(parsers::parse_header(v, testv_pass.begin(), testv_pass.end()));
+    BOOST_CHECK_EQUAL(v.second.size(), 2);
+    BOOST_CHECK_EQUAL(v.second[0].received_protocol.version, std::string("1.0"));
+    BOOST_CHECK_EQUAL(v.second[0].received_by.host, std::string("fred"));
+    BOOST_CHECK_EQUAL(v.second[0].comment.size(), 0);
+    BOOST_CHECK_EQUAL(v.second[1].received_protocol.version, std::string("1.1"));
+    BOOST_CHECK_EQUAL(v.second[1].received_by.host, std::string("p.example.net"));
+    BOOST_CHECK_EQUAL(v.second[1].comment.size(), 1);
+    BOOST_CHECK(v.second[1].comment[0].type() == typeid(std::string));
+    BOOST_CHECK_EQUAL(boost::get<std::string>(v.second[1].comment[0]), std::string("Apache/1.1"));
+}
+
+void test_warning()
+{
+    headers::warning w;
+    std::string testv_pass("123 p.example.net:1 \"danger\", 111 t.example.net \"will\" \"Tue, 15 Nov 1994 08:12:31 GMT\"");
+    BOOST_REQUIRE(parsers::parse_header(w, testv_pass.begin(), testv_pass.end()));
+    BOOST_CHECK_EQUAL(w.second.size(), 2);
+    BOOST_CHECK_EQUAL(w.second[0].code, 123);
+    BOOST_CHECK_EQUAL(w.second[0].agent.host, std::string("p.example.net"));
+    BOOST_CHECK_EQUAL(w.second[0].agent.port.get(), 1);
+    BOOST_CHECK_EQUAL(w.second[0].text, std::string("danger"));
+    BOOST_CHECK(!w.second[0].date);
+    BOOST_CHECK_EQUAL(w.second[1].code, 111);
+    BOOST_CHECK_EQUAL(w.second[1].agent.host, std::string("t.example.net"));
+    BOOST_CHECK(!w.second[1].agent.port);
+    BOOST_CHECK_EQUAL(w.second[1].text, std::string("will"));
+    BOOST_CHECK_EQUAL(w.second[1].date->date().day(), 15);
+    BOOST_CHECK_EQUAL(w.second[1].date->date().month(), boost::gregorian::Nov);
+    BOOST_CHECK_EQUAL(w.second[1].date->date().year(), 1994);
+    BOOST_CHECK_EQUAL(w.second[1].date->time_of_day().hours(), 8);
+    BOOST_CHECK_EQUAL(w.second[1].date->time_of_day().minutes(), 12);
+    BOOST_CHECK_EQUAL(w.second[1].date->time_of_day().seconds(), 31);
 }
 
 void test_content_length()
@@ -114,6 +146,7 @@ test_suite* init_unit_test_suite(int, char*[])
     test->add(BOOST_TEST_CASE(&test_transfer_encoding));
     test->add(BOOST_TEST_CASE(&test_upgrade));
     test->add(BOOST_TEST_CASE(&test_via));
+    test->add(BOOST_TEST_CASE(&test_warning));
     test->add(BOOST_TEST_CASE(&test_content_length));
     return test;
 }

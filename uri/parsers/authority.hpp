@@ -44,7 +44,9 @@ struct authority
         ipv4address %= qi::raw[dec_octet >> qi::repeat(3)[qi::lit('.') >> dec_octet]];
 
         // reg-name = *( unreserved / pct-encoded / sub-delims )
-        reg_name %= *(this->unreserved | this->pct_encoded | this->sub_delims);
+        // Don't allow trailing commas. This is a hack to work around abiguities in the grammars
+        // of certain HTTP headers such a Via.
+        reg_name %= qi::lexeme[*(this->unreserved | this->pct_encoded | (this->sub_delims - ", "))];
 
         // TODO, host = IP-literal / IPv4address / reg-name
         host %= ipv4address | reg_name;

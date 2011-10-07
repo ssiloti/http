@@ -24,7 +24,7 @@ struct comment
         start %= '(' >> *(ctext_or_quoted_cpair | start) >> ')';
         // Use a separate rule so we can adapt the std::vector<char> into an std::string
         // Qi can't adapt variant<std::vector<char>, B> to variant<std::string, B>
-        ctext_or_quoted_cpair %= *(ctext | quoted_cpair);
+        ctext_or_quoted_cpair %= +(ctext | quoted_cpair);
         quoted_cpair %= '\\' >> (b.wsp | b.vchar | b.obs_text);
         // Switched from ows to (-obs_fold >> wsp) to avoid sythesizing
         // a vector attribute. ctext_or_quoted_cpair takes care of the empty case.

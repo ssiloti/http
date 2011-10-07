@@ -64,6 +64,14 @@ struct via_intermediary
     http::comment comment;
 };
 
+struct warning_value
+{
+    boost::uint16_t code;
+    host_type agent;
+    std::string text;
+    boost::optional<boost::posix_time::ptime> date;
+};
+
 } }
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -89,6 +97,14 @@ BOOST_FUSION_ADAPT_STRUCT(
     (http::headers::via_intermediary::protocol_t, received_protocol)
     (http::headers::host_type, received_by)
     (http::comment, comment)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    http::headers::warning_value,
+    (boost::uint16_t, code)
+    (http::headers::host_type, agent)
+    (std::string, text)
+    (boost::optional<boost::posix_time::ptime>, date)
 )
 
 namespace http {
@@ -134,13 +150,6 @@ typedef boost::fusion::pair<boost::mpl::string<'upgr' , 'ade'>,
 typedef boost::fusion::pair<boost::mpl::string<'via'>,
         std::vector<via_intermediary> > via;
 
-struct warning_value
-{
-    boost::uint16_t code;
-    struct agent_t { std::string host; boost::optional<boost::uint16_t> port; } agent;
-    std::string text;
-    boost::optional<boost::posix_time::ptime> date;
-};
 typedef boost::fusion::pair<boost::mpl::string<'warn', 'ing'>,
         std::vector<warning_value> > warning;
 
