@@ -88,7 +88,7 @@ void test_via()
 {
     headers::via v;
     std::string testv_pass("1.0 fred, 1.1 p.example.net (Apache/1.1)");
-    BOOST_CHECK(parsers::parse_header(v, testv_pass.begin(), testv_pass.end()));
+    BOOST_REQUIRE(parsers::parse_header(v, testv_pass.begin(), testv_pass.end()));
     BOOST_CHECK_EQUAL(v.second.size(), 2);
     BOOST_CHECK_EQUAL(v.second[0].received_protocol.version, std::string("1.0"));
     BOOST_CHECK_EQUAL(v.second[0].received_by.host, std::string("fred"));
@@ -121,6 +121,13 @@ void test_warning()
     BOOST_CHECK_EQUAL(w.second[1].date->time_of_day().hours(), 8);
     BOOST_CHECK_EQUAL(w.second[1].date->time_of_day().minutes(), 12);
     BOOST_CHECK_EQUAL(w.second[1].date->time_of_day().seconds(), 31);
+}
+
+void test_accept()
+{
+    headers::accept a;
+    std::string testv_pass("audio/*; q=0.2, audio/basic");
+    BOOST_REQUIRE(parsers::parse_header(a, testv_pass.begin(), testv_pass.end()));
 }
 
 void test_content_length()

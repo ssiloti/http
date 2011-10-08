@@ -72,6 +72,20 @@ struct warning_value
     boost::optional<boost::posix_time::ptime> date;
 };
 
+struct accept_value
+{
+    http::media_type media_range;
+#if 0
+    struct params_t {
+        float qvalue;
+        typedef std::map<std::string, std::string> ext_t;
+        ext_t ext;
+    };
+#endif
+    typedef std::map<std::string, std::string> params_t;
+    params_t params;
+};
+
 } }
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -105,6 +119,20 @@ BOOST_FUSION_ADAPT_STRUCT(
     (http::headers::host_type, agent)
     (std::string, text)
     (boost::optional<boost::posix_time::ptime>, date)
+)
+
+#if 0
+BOOST_FUSION_ADAPT_STRUCT(
+    http::headers::accept_value::params_t,
+    (float, qvalue)
+    (http::headers::accept_value::params_t::ext_t, ext)
+)
+#endif
+
+BOOST_FUSION_ADAPT_STRUCT(
+    http::headers::accept_value,
+    (http::media_type, media_range)
+    (http::headers::accept_value::params_t, params)
 )
 
 namespace http {
@@ -158,15 +186,6 @@ typedef boost::fusion::pair<boost::mpl::string<'mime', '-ver', 'sion'>,
 
 // Request Header Fields
 
-struct accept_value
-{
-    http::media_type media_range;
-    struct params_t {
-        float qvalue;
-        std::map<std::string, std::string> ext;
-    };
-    boost::optional<params_t> params;
-};
 typedef boost::fusion::pair<boost::mpl::string<'acce', 'pt'>,
         std::vector<accept_value> > accept;
 

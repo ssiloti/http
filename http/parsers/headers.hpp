@@ -108,8 +108,22 @@ bool parse_header(headers::warning& header, InputIterator begin, InputIterator e
     rule<InputIterator, boost::uint16_t()> code = uint_parser<unsigned, 10, 3, 3>();
     rule<InputIterator, headers::host_type()> agent = a.host >> -(':' >> ushort_);
     rule<InputIterator, std::string()> text = b.quoted_string;
-    rule<InputIterator, boost::posix_time::ptime()> date = '"' >> date_grammar<InputIterator>() >> '"';
-    return boost::spirit::qi::phrase_parse(begin, end, (code >> agent >> text >> -date) % ',', b.skipper, header.second) && begin == end;
+    // For some reason parsing the date fails when it's in its own rule
+//    rule<InputIterator, boost::posix_time::ptime()> date = lit('"') >> date_grammar<InputIterator>() >> lit('"');
+    return phrase_parse(begin, end, (code >> agent >> text >> -(lit('"') >> date_grammar<InputIterator>() >> lit('"'))) % ',', b.skipper, header.second) && begin == end;
+}
+
+template <typename InputIterator>
+bool parse_header(headers::mime_version& header, InputIterator begin, InputIterator end)
+{
+    return boost::spirit::qi::phrase_parse(begin, end, uint_parser<unsigned, 10, 1, 1>() >> '.' >> uint_parser<unsigned, 10, 1, 1>(), b.skipper, header.second) && begin == end;
+}
+
+template <typename InputIterator>
+bool parse_header(headers::accept& header, InputIterator begin, InputIterator end)
+{
+    basic_rules<InputIterator> b;
+    return boost::spirit::qi::phrase_parse(begin, end, (media_type<InputIterator>() >> *(';' >> b.token >> '=' >> b.word)) % ',', b.skipper, header.second) && begin == end;
 }
 
 template <typename InputIterator>
