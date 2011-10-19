@@ -75,15 +75,12 @@ struct warning_value
 struct accept_value
 {
     http::media_type media_range;
-#if 0
     struct params_t {
         float qvalue;
         typedef std::map<std::string, std::string> ext_t;
         ext_t ext;
     };
-#endif
-    typedef std::map<std::string, std::string> params_t;
-    params_t params;
+    boost::optional<params_t> params;
 };
 
 } }
@@ -121,18 +118,16 @@ BOOST_FUSION_ADAPT_STRUCT(
     (boost::optional<boost::posix_time::ptime>, date)
 )
 
-#if 0
 BOOST_FUSION_ADAPT_STRUCT(
     http::headers::accept_value::params_t,
     (float, qvalue)
     (http::headers::accept_value::params_t::ext_t, ext)
 )
-#endif
 
 BOOST_FUSION_ADAPT_STRUCT(
     http::headers::accept_value,
     (http::media_type, media_range)
-    (http::headers::accept_value::params_t, params)
+    (boost::optional<http::headers::accept_value::params_t>, params)
 )
 
 namespace http {

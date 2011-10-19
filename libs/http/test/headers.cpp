@@ -128,6 +128,13 @@ void test_accept()
     headers::accept a;
     std::string testv_pass("audio/*; q=0.2, audio/basic");
     BOOST_REQUIRE(parsers::parse_header(a, testv_pass.begin(), testv_pass.end()));
+    BOOST_CHECK_EQUAL(a.second.size(), 2);
+    BOOST_CHECK_EQUAL(a.second[0].media_range.type, std::string("audio"));
+    BOOST_CHECK_EQUAL(a.second[0].media_range.subtype, std::string("*"));
+    BOOST_CHECK_EQUAL(a.second[0].params.get().qvalue, 0.2f);
+    BOOST_CHECK_EQUAL(a.second[1].media_range.type, std::string("audio"));
+    BOOST_CHECK_EQUAL(a.second[1].media_range.subtype, std::string("basic"));
+    BOOST_CHECK(!a.second[1].params);
 }
 
 void test_content_length()
@@ -139,6 +146,13 @@ void test_content_length()
     BOOST_REQUIRE(parsers::parse_header(cl, testv_pass.begin(), testv_pass.end()));
     BOOST_CHECK_EQUAL(cl.second, 1234);
     BOOST_CHECK(!parsers::parse_header(cl, testv_fail.begin(), testv_fail.end()));
+}
+
+void test_content_type()
+{
+    headers::content_type ct;
+    std::string testv_pass("text/html; charset=ISO-8859-4");
+    BOOST_REQUIRE(parsers::parse_header(ct, testv_pass.begin(), testv_pass.end()));
 }
 
 test_suite* init_unit_test_suite(int, char*[])
@@ -154,6 +168,8 @@ test_suite* init_unit_test_suite(int, char*[])
     test->add(BOOST_TEST_CASE(&test_upgrade));
     test->add(BOOST_TEST_CASE(&test_via));
     test->add(BOOST_TEST_CASE(&test_warning));
+    test->add(BOOST_TEST_CASE(&test_accept));
     test->add(BOOST_TEST_CASE(&test_content_length));
+    test->add(BOOST_TEST_CASE(&test_content_type));
     return test;
 }

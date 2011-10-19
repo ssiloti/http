@@ -24,6 +24,7 @@
 #include <boost/spirit/home/qi/operator.hpp>
 #include <boost/spirit/home/qi/directive/as.hpp>
 #include <boost/spirit/home/qi/auxiliary/attr.hpp>
+#include <boost/spirit/home/qi/auxiliary/attr_cast.hpp>
 
 namespace http { namespace parsers {
 
@@ -108,7 +109,7 @@ bool parse_header(headers::warning& header, InputIterator begin, InputIterator e
     rule<InputIterator, boost::uint16_t()> code = uint_parser<unsigned, 10, 3, 3>();
     rule<InputIterator, headers::host_type()> agent = a.host >> -(':' >> ushort_);
     rule<InputIterator, std::string()> text = b.quoted_string;
-    // For some reason parsing the date fails when it's in its own rule
+    // For some reason parsing the date fails when it's in its own rule *shrug*
 //    rule<InputIterator, boost::posix_time::ptime()> date = lit('"') >> date_grammar<InputIterator>() >> lit('"');
     return phrase_parse(begin, end, (code >> agent >> text >> -(lit('"') >> date_grammar<InputIterator>() >> lit('"'))) % ',', b.skipper, header.second) && begin == end;
 }
@@ -122,8 +123,11 @@ bool parse_header(headers::mime_version& header, InputIterator begin, InputItera
 template <typename InputIterator>
 bool parse_header(headers::accept& header, InputIterator begin, InputIterator end)
 {
+    using namespace boost::spirit::qi;
     basic_rules<InputIterator> b;
-    return boost::spirit::qi::phrase_parse(begin, end, (media_type<InputIterator>() >> *(';' >> b.token >> '=' >> b.word)) % ',', b.skipper, header.second) && begin == end;
+
+    rule<InputIterator, boost::optional<headers::accept_value::params_t>()> accept_params = -(';' >> b.ows >> "q=" >> real_parser<float, ureal_policies<float> >() >> *(';' >> b.token >> '=' >> b.word));
+    return phrase_parse(begin, end, (media_type<InputIterator>() >> accept_params) % ',', b.skipper, header.second) && begin == end;
 }
 
 template <typename InputIterator>

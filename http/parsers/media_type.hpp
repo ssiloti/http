@@ -31,7 +31,9 @@ struct media_type
     {
         start %= b.token >> '/' >> b.token >> parameters;
         parameters %= *(b.ows >> ';' >> b.ows >> parameter);
-        parameter %= b.token >> '=' >> b.word;
+        // q is not allowed as a media type parameter because it is used
+        // as a separator in the Accept header
+        parameter %= (b.token - 'q') >> '=' >> b.word;
     }
 
     basic_rules<Iterator> b;
