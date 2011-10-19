@@ -19,6 +19,7 @@
 #include <boost/mpl/push_front.hpp>
 #include <boost/mpl/vector/vector0.hpp>
 #include <boost/mpl/transform.hpp>
+#include <boost/mpl/contains.hpp>
 #include <boost/mpl/pair.hpp>
 #include <boost/mpl/string.hpp>
 
