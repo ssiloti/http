@@ -137,6 +137,44 @@ void test_accept()
     BOOST_CHECK(!a.second[1].params);
 }
 
+void test_accept_charset()
+{
+    headers::accept_charset ac;
+    std::string testv_pass("iso-8859-5, unicode-1-1;q=0.8");
+    BOOST_REQUIRE(parsers::parse_header(ac, testv_pass.begin(), testv_pass.end()));
+    BOOST_CHECK_EQUAL(ac.second.size(), 2);
+    BOOST_CHECK_EQUAL(ac.second[0].charset, std::string("iso-8859-5"));
+    BOOST_CHECK(!ac.second[0].qvalue);
+    BOOST_CHECK_EQUAL(ac.second[1].charset, std::string("unicode-1-1"));
+    BOOST_CHECK_EQUAL(ac.second[1].qvalue.get(), 0.8f);
+}
+
+void test_accept_encoding()
+{
+    headers::accept_encoding ae;
+    std::string testv_pass("compress, gzip;q=1.0");
+    BOOST_REQUIRE(parsers::parse_header(ae, testv_pass.begin(), testv_pass.end()));
+    BOOST_CHECK_EQUAL(ae.second.size(), 2);
+    BOOST_CHECK_EQUAL(ae.second[0].coding, std::string("compress"));
+    BOOST_CHECK(!ae.second[0].qvalue);
+    BOOST_CHECK_EQUAL(ae.second[1].coding, std::string("gzip"));
+    BOOST_CHECK_EQUAL(ae.second[1].qvalue.get(), 1.0f);
+}
+
+void test_accept_language()
+{
+    headers::accept_language al;
+    std::string testv_pass("da, en-gb;q=0.8, en;q=0.7");
+    BOOST_REQUIRE(parsers::parse_header(al, testv_pass.begin(), testv_pass.end()));
+    BOOST_CHECK_EQUAL(al.second.size(), 3);
+    BOOST_CHECK_EQUAL(al.second[0].range, std::string("da"));
+    BOOST_CHECK(!al.second[0].qvalue);
+    BOOST_CHECK_EQUAL(al.second[1].range, std::string("en-gb"));
+    BOOST_CHECK_EQUAL(al.second[1].qvalue.get(), 0.8f);
+    BOOST_CHECK_EQUAL(al.second[2].range, std::string("en"));
+    BOOST_CHECK_EQUAL(al.second[2].qvalue.get(), 0.7f);
+}
+
 void test_content_length()
 {
     headers::content_length cl;
@@ -169,6 +207,9 @@ test_suite* init_unit_test_suite(int, char*[])
     test->add(BOOST_TEST_CASE(&test_via));
     test->add(BOOST_TEST_CASE(&test_warning));
     test->add(BOOST_TEST_CASE(&test_accept));
+    test->add(BOOST_TEST_CASE(&test_accept_charset));
+    test->add(BOOST_TEST_CASE(&test_accept_encoding));
+    test->add(BOOST_TEST_CASE(&test_accept_language));
     test->add(BOOST_TEST_CASE(&test_content_length));
     test->add(BOOST_TEST_CASE(&test_content_type));
     return test;

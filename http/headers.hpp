@@ -83,6 +83,24 @@ struct accept_value
     boost::optional<params_t> params;
 };
 
+struct charset_t
+{
+    std::string charset;
+    boost::optional<float> qvalue;
+};
+
+struct coding_t
+{
+    std::string coding;
+    boost::optional<float> qvalue;
+};
+
+struct language_t
+{
+    std::string range;
+    boost::optional<float> qvalue;
+};
+
 } }
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -128,6 +146,24 @@ BOOST_FUSION_ADAPT_STRUCT(
     http::headers::accept_value,
     (http::media_type, media_range)
     (boost::optional<http::headers::accept_value::params_t>, params)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    http::headers::charset_t,
+    (std::string, charset)
+    (boost::optional<float>, qvalue)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    http::headers::coding_t,
+    (std::string, coding)
+    (boost::optional<float>, qvalue)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    http::headers::language_t,
+    (std::string, range)
+    (boost::optional<float>, qvalue)
 )
 
 namespace http {
@@ -184,15 +220,12 @@ typedef boost::fusion::pair<boost::mpl::string<'mime', '-ver', 'sion'>,
 typedef boost::fusion::pair<boost::mpl::string<'acce', 'pt'>,
         std::vector<accept_value> > accept;
 
-struct charset_t { std::string charset; boost::optional<float> qvalue; };
 typedef boost::fusion::pair<boost::mpl::string<'acce', 'pt-c', 'hars', 'et'>,
         std::vector<charset_t> > accept_charset;
 
-struct coding_t { std::string coding; boost::optional<float> qvalue; };
 typedef boost::fusion::pair<boost::mpl::string<'acce', 'pt-e', 'ncod', 'ing'>,
         std::vector<coding_t> > accept_encoding;
 
-struct language_t { std::string range; boost::optional<float> qvalue; };
 typedef boost::fusion::pair<boost::mpl::string<'acce', 'pt-l', 'angu', 'age'>,
         std::vector<language_t> > accept_language;
 

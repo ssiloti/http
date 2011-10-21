@@ -22,6 +22,7 @@
 #include <boost/spirit/include/qi_parse_auto.hpp>
 #include <boost/spirit/home/qi/numeric.hpp>
 #include <boost/spirit/home/qi/operator.hpp>
+#include <boost/spirit/home/qi/directive/repeat.hpp>
 #include <boost/spirit/home/qi/directive/as.hpp>
 #include <boost/spirit/home/qi/auxiliary/attr.hpp>
 #include <boost/spirit/home/qi/auxiliary/attr_cast.hpp>
@@ -128,6 +129,33 @@ bool parse_header(headers::accept& header, InputIterator begin, InputIterator en
 
     rule<InputIterator, boost::optional<headers::accept_value::params_t>()> accept_params = -(';' >> b.ows >> "q=" >> real_parser<float, ureal_policies<float> >() >> *(';' >> b.token >> '=' >> b.word));
     return phrase_parse(begin, end, (media_type<InputIterator>() >> accept_params) % ',', b.skipper, header.second) && begin == end;
+}
+
+template <typename InputIterator>
+bool parse_header(headers::accept_charset& header, InputIterator begin, InputIterator end)
+{
+    using namespace boost::spirit::qi;
+    basic_rules<InputIterator> b;
+    return phrase_parse(begin, end, (b.token >> -(';' >> b.ows >> "q=" >> real_parser<float, ureal_policies<float> >())) % ',', b.skipper, header.second) && begin == end;
+}
+
+// TODO: Eliminate code duplication
+template <typename InputIterator>
+bool parse_header(headers::accept_encoding& header, InputIterator begin, InputIterator end)
+{
+    using namespace boost::spirit::qi;
+    basic_rules<InputIterator> b;
+    return phrase_parse(begin, end, (b.token >> -(';' >> b.ows >> "q=" >> real_parser<float, ureal_policies<float> >())) % ',', b.skipper, header.second) && begin == end;
+
+}
+
+template <typename InputIterator>
+bool parse_header(headers::accept_language& header, InputIterator begin, InputIterator end)
+{
+    using namespace boost::spirit::qi;
+    basic_rules<InputIterator> b;
+    rule<InputIterator, std::string()> language_range = char_('*') | (repeat(1, 8)[b.alpha] >> *(char_('-') >> repeat(1, 8)[b.alpha | b.digit]));
+    return phrase_parse(begin, end, (language_range >> -(';' >> b.ows >> "q=" >> real_parser<float, ureal_policies<float> >())) % ',', b.skipper, header.second) && begin == end;
 }
 
 template <typename InputIterator>
