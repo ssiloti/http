@@ -175,6 +175,48 @@ void test_accept_language()
     BOOST_CHECK_EQUAL(al.second[2].qvalue.get(), 0.7f);
 }
 
+void test_authorization()
+{
+    headers::authorization a;
+    std::string testv_pass("Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
+    BOOST_REQUIRE(parsers::parse_header(a, testv_pass.begin(), testv_pass.end()));
+    BOOST_CHECK_EQUAL(a.second.scheme, std::string("Basic"));
+    BOOST_CHECK_EQUAL(boost::get<std::string>(a.second.params.get()), std::string("QWxhZGRpbjpvcGVuIHNlc2FtZQ=="));
+}
+
+void test_expect()
+{
+    headers::expect e;
+    std::string testv_pass("100-continue, extention = value; param=value");
+    BOOST_REQUIRE(parsers::parse_header(e, testv_pass.begin(), testv_pass.end()));
+    BOOST_CHECK_EQUAL(e.second.size(), 2);
+    BOOST_CHECK_EQUAL(e.second.count("100-continue"), 1);
+    BOOST_CHECK_EQUAL(boost::fusion::at_c<0>(e.second["extention"]), std::string("value"));
+    BOOST_CHECK_EQUAL(boost::fusion::at_c<1>(e.second["extention"]).size(), 1);
+    BOOST_CHECK_EQUAL(boost::fusion::at_c<1>(e.second["extention"])["param"], std::string("value"));
+}
+
+void test_host()
+{
+    headers::host h;
+    std::string testv_pass("www.example.org");
+    BOOST_REQUIRE(parsers::parse_header(h, testv_pass.begin(), testv_pass.end()));
+    BOOST_CHECK_EQUAL(h.second.host, std::string("www.example.org"));
+}
+
+void test_if_match()
+{
+    headers::if_match ifm;
+    std::string testv_pass("W/\"xyzzy\", \"r2d2xxxx\", \"c3piozzzz\"");
+    BOOST_REQUIRE(parsers::parse_header(ifm, testv_pass.begin(), testv_pass.end()));
+    BOOST_CHECK_EQUAL(boost::get<std::vector<http::entity_tag> >(ifm.second)[0].weak, true);
+    BOOST_CHECK_EQUAL(boost::get<std::vector<http::entity_tag> >(ifm.second)[0].tag, std::string("xyzzy"));
+    BOOST_CHECK_EQUAL(boost::get<std::vector<http::entity_tag> >(ifm.second)[1].weak, false);
+    BOOST_CHECK_EQUAL(boost::get<std::vector<http::entity_tag> >(ifm.second)[1].tag, std::string("r2d2xxxx"));
+    BOOST_CHECK_EQUAL(boost::get<std::vector<http::entity_tag> >(ifm.second)[2].weak, false);
+    BOOST_CHECK_EQUAL(boost::get<std::vector<http::entity_tag> >(ifm.second)[2].tag, std::string("c3piozzzz"));
+}
+
 void test_content_length()
 {
     headers::content_length cl;
@@ -210,6 +252,10 @@ test_suite* init_unit_test_suite(int, char*[])
     test->add(BOOST_TEST_CASE(&test_accept_charset));
     test->add(BOOST_TEST_CASE(&test_accept_encoding));
     test->add(BOOST_TEST_CASE(&test_accept_language));
+    test->add(BOOST_TEST_CASE(&test_authorization));
+    test->add(BOOST_TEST_CASE(&test_expect));
+    test->add(BOOST_TEST_CASE(&test_host));
+    test->add(BOOST_TEST_CASE(&test_if_match));
     test->add(BOOST_TEST_CASE(&test_content_length));
     test->add(BOOST_TEST_CASE(&test_content_type));
     return test;

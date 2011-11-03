@@ -13,6 +13,8 @@
 
 #include <http/media_type.hpp>
 #include <http/comment.hpp>
+#include <http/asterisk.hpp>
+#include <http/entity_tag.hpp>
 
 #include <uri/basic_uri.hpp>
 
@@ -38,12 +40,6 @@ struct host_type
 {
     std::string host;
     boost::optional<boost::uint16_t> port;
-};
-
-struct entity_tag_type
-{
-    bool weak;
-    std::string tag;
 };
 
 struct product_type
@@ -99,6 +95,13 @@ struct language_t
 {
     std::string range;
     boost::optional<float> qvalue;
+};
+
+struct credentials_t
+{
+    std::string scheme;
+    typedef boost::optional<boost::variant<std::string, std::map<std::string, std::string> > > params_t;
+    params_t params;
 };
 
 } }
@@ -166,10 +169,14 @@ BOOST_FUSION_ADAPT_STRUCT(
     (boost::optional<float>, qvalue)
 )
 
+BOOST_FUSION_ADAPT_STRUCT(
+    http::headers::credentials_t,
+    (std::string, scheme)
+    (http::headers::credentials_t::params_t, params)
+)
+
 namespace http {
 namespace headers {
-
-struct asterisk {};
 
 template <typename Header>
 inline void clear_header(Header& header)
@@ -229,16 +236,11 @@ typedef boost::fusion::pair<boost::mpl::string<'acce', 'pt-e', 'ncod', 'ing'>,
 typedef boost::fusion::pair<boost::mpl::string<'acce', 'pt-l', 'angu', 'age'>,
         std::vector<language_t> > accept_language;
 
-struct credentials_type
-{
-    std::string scheme;
-    boost::optional<boost::variant<std::string, std::map<std::string, std::string> > > params;
-};
 typedef boost::fusion::pair<boost::mpl::string<'auth', 'oriz', 'atio', 'n'>,
-        credentials_type> authorization;
+        credentials_t> authorization;
 
 typedef boost::fusion::pair<boost::mpl::string<'expe', 'ct'>,
-        std::vector<std::map<std::string, std::vector<std::string> > > > expect;
+        std::map<std::string, boost::fusion::vector2<std::string, std::map<std::string, std::string> > > > expect;
 
 // TODO: This should use an email address library
 typedef boost::fusion::pair<boost::mpl::string<'from'>,
@@ -248,16 +250,16 @@ typedef boost::fusion::pair<boost::mpl::string<'host'>,
         host_type> host;
 
 typedef boost::fusion::pair<boost::mpl::string<'if-m', 'atch'>,
-        boost::variant<asterisk, std::vector<entity_tag_type> > > if_match;
+        boost::variant<asterisk, std::vector<entity_tag> > > if_match;
 
 typedef boost::fusion::pair<boost::mpl::string<'if-m', 'odif', 'ied-', 'sinc', 'e'>,
         boost::posix_time::ptime> if_modified_since;
 
 typedef boost::fusion::pair<boost::mpl::string<'if-n', 'one-', 'matc', 'h'>,
-        boost::variant<asterisk, std::vector<entity_tag_type> > > if_none_match;
+        boost::variant<asterisk, std::vector<entity_tag> > > if_none_match;
 
 typedef boost::fusion::pair<boost::mpl::string<'if-r', 'ange'>,
-        boost::variant<entity_tag_type, boost::posix_time::ptime> > if_range;
+        boost::variant<entity_tag, boost::posix_time::ptime> > if_range;
 
 typedef boost::fusion::pair<boost::mpl::string<'if-u', 'nmod', 'ifie', 'd-si', 'nce'>,
         boost::posix_time::ptime> if_unmodified_since;
@@ -272,7 +274,7 @@ inline void clear_header(max_forwards& header)
 }
 
 typedef boost::fusion::pair<boost::mpl::string<'prox', 'y-au', 'thor', 'izat', 'ion'>,
-        credentials_type> proxy_authorization;
+        credentials_t> proxy_authorization;
 
 struct byte_range_pre { std::size_t first; boost::optional<std::size_t> last; };
 struct byte_range_post { boost::optional<std::size_t> first; std::size_t last; };
@@ -328,7 +330,7 @@ typedef boost::fusion::pair<boost::mpl::string<'allo', 'w'>,
         std::vector<std::string> > allow;
 
 typedef boost::fusion::pair<boost::mpl::string<'etag'>,
-        entity_tag_type> etag;
+        entity_tag> etag;
 
 // TODO: Add URI reference type to the URI library
 typedef boost::fusion::pair<boost::mpl::string<'loca', 'tion'>,

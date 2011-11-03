@@ -15,6 +15,7 @@
 #include <http/parsers/comment.hpp>
 #include <http/parsers/date.hpp>
 #include <http/parsers/media_type.hpp>
+#include <http/parsers/entity_tag.hpp>
 #include <http/parsers/basic_rules.hpp>
 #include <uri/parsers/authority.hpp>
 #include <uri/parsers/characters.hpp>
@@ -156,6 +157,48 @@ bool parse_header(headers::accept_language& header, InputIterator begin, InputIt
     basic_rules<InputIterator> b;
     rule<InputIterator, std::string()> language_range = char_('*') | (repeat(1, 8)[b.alpha] >> *(char_('-') >> repeat(1, 8)[b.alpha | b.digit]));
     return phrase_parse(begin, end, (language_range >> -(';' >> b.ows >> "q=" >> real_parser<float, ureal_policies<float> >())) % ',', b.skipper, header.second) && begin == end;
+}
+
+template <typename InputIterator>
+bool parse_header(headers::authorization& header, InputIterator begin, InputIterator end)
+{
+    using namespace boost::spirit::qi;
+    basic_rules<InputIterator> b;
+    rule<InputIterator, std::map<std::string, std::string>()> paramv = (b.token >> (b.token | b.quoted_string)) % ',';
+    rule<InputIterator, headers::credentials_t::params_t()> auth_param = -(as_string[b.token] | b.quoted_string | paramv);
+    rule<InputIterator, headers::credentials_t::params_t()> basic_credentials = -(as_string[+char_("A-Za-z0-9+/=")] | paramv);
+    return phrase_parse(begin, end, (string("Basic") >> basic_credentials) | (b.token >> auth_param), b.skipper, header.second) && begin == end;
+}
+
+template <typename InputIterator>
+bool parse_header(headers::expect& header, InputIterator begin, InputIterator end)
+{
+    basic_rules<InputIterator> b;
+    return boost::spirit::qi::phrase_parse(begin, end, (b.token >> -('=' >> (b.token | b.quoted_string) >> *(';' >> b.token >> '=' >> (b.token | b.quoted_string)))) % ',', b.skipper, header.second) && begin == end;
+}
+
+template <typename InputIterator>
+bool parse_header(headers::from& header, InputIterator begin, InputIterator end)
+{
+    using namespace boost::spirit::qi;
+    basic_rules<InputIterator> b;
+    return phrase_parse(begin, end, string, b.skipper, header.second) && begin == end;
+}
+
+template <typename InputIterator>
+bool parse_header(headers::host& header, InputIterator begin, InputIterator end)
+{
+    basic_rules<InputIterator> b;
+    uri::parsers::authority<InputIterator, std::string> a;
+    return boost::spirit::qi::phrase_parse(begin, end, a.host >> -(':' >> boost::spirit::qi::ushort_), b.skipper, header.second) && begin == end;
+}
+
+template <typename InputIterator>
+bool parse_header(headers::if_match& header, InputIterator begin, InputIterator end)
+{
+    using namespace boost::spirit::qi;
+    basic_rules<InputIterator> b;
+    return phrase_parse(begin, end, (lit('*') >> attr(asterisk())) | (entity_tag<InputIterator>() % ','), b.skipper, header.second) && begin == end;
 }
 
 template <typename InputIterator>

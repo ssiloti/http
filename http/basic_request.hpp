@@ -11,6 +11,7 @@
 #define HTTP_BASIC_REQUEST_HPP
 
 #include <http/basic_message.hpp>
+#include <http/asterisk.hpp>
 
 #include <uri/basic_uri.hpp>
 
@@ -21,12 +22,6 @@
 #include <boost/spirit/home/karma/domain.hpp>
 
 namespace http {
-
-struct asterisk
-{
-    asterisk() : c('*') {}
-    char c;
-};
 
 template <typename Headers, typename Body>
 class basic_request : public basic_message<Headers, Body>
