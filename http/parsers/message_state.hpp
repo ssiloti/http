@@ -11,6 +11,7 @@
 #define HTTP_PARSERS_MESSAGE_STATE_HPP
 
 #include <http/headers.hpp>
+#include <http/parsers/body.hpp>
 
 #include <boost/asio/buffer.hpp>
 
