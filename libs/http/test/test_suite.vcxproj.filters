@@ -15,7 +15,19 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="headers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test_suite.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="basic_request.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="basic_response.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="parser_message_state.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

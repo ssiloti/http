@@ -12,14 +12,10 @@
 #include <http/generators/response.hpp>
 
 #include <boost/test/unit_test.hpp>
-#include <boost/test/included/unit_test_framework.hpp>
-
 #include <boost/mpl/map/map0.hpp>
 
 #include <sstream>
 #include <iterator>
-
-using boost::unit_test::test_suite;
 
 void parse_response()
 {
@@ -48,13 +44,13 @@ void generate_response()
 
     BOOST_CHECK(response.generate_start_line(std::ostream_iterator<char>(output)));
 
-    BOOST_CHECK_EQUAL(output.str(), std::string("HTTP/1.1 200 OK"));
+    BOOST_CHECK_EQUAL(output.str(), std::string("HTTP/1.1 200 OK\r\n"));
 }
 
-test_suite* init_unit_test_suite(int, char*[])
+void init_basic_response_suite(int, char*[])
 {
-  test_suite* test = BOOST_TEST_SUITE("basic_response");
-  test->add(BOOST_TEST_CASE(&parse_response));
-  test->add(BOOST_TEST_CASE(&generate_response));
-  return test;
+    boost::unit_test::test_suite* test = BOOST_TEST_SUITE("basic_response");
+    test->add(BOOST_TEST_CASE(&parse_response));
+    test->add(BOOST_TEST_CASE(&generate_response));
+    boost::unit_test::framework::master_test_suite().add(test);
 }

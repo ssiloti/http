@@ -12,15 +12,11 @@
 #include <http/generators/request.hpp>
 
 #include <boost/test/unit_test.hpp>
-#include <boost/test/included/unit_test_framework.hpp>
-
 #include <boost/mpl/map/map0.hpp>
 
 #include <iterator>
 #include <string>
 #include <vector>
-
-using boost::unit_test::test_suite;
 
 void parse_request()
 {
@@ -51,11 +47,12 @@ void generate_request()
     BOOST_CHECK_EQUAL(sink.str(), std::string("GET * HTTP/1.1"));
 }
 
-test_suite* init_unit_test_suite(int, char*[])
+void init_basic_request_suite(int, char*[])
 {
-  test_suite* test = BOOST_TEST_SUITE("basic_request");
-  test->add(BOOST_TEST_CASE(&parse_request));
-  test->add(BOOST_TEST_CASE(&generate_request));
-  return test;
+    boost::unit_test::test_suite* test = BOOST_TEST_SUITE("basic_request");
+    test->add(BOOST_TEST_CASE(&parse_request));
+    test->add(BOOST_TEST_CASE(&generate_request));
+
+    boost::unit_test::framework::master_test_suite().add(test);
 }
 

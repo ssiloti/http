@@ -10,15 +10,16 @@
 #include <http/parsers/message_state.hpp>
 
 #include <boost/test/unit_test.hpp>
-#include <boost/test/included/unit_test_framework.hpp>
 
 #include <string>
 #include <vector>
 
-using boost::unit_test::test_suite;
-
 struct test_message
 {
+    typedef std::vector<std::string> headers_type;
+    typedef std::string body_type;
+    static const std::size_t default_content_length = 0;
+
     test_message(const std::string& start_line, const std::vector<std::string>& headers)
         : start_line_(start_line), headers_(headers)
     {
@@ -43,10 +44,38 @@ struct test_message
         return true;
     }
 
+    struct
+    {
+        template <typename T>
+        boost::optional<const std::size_t&> maybe_at()
+        {
+            return boost::optional<const std::size_t&>();
+        }
+    } headers;
+
     std::string start_line_;
-    std::vector<std::string> headers_;
+    headers_type headers_;
+    body_type body;
     std::vector<std::string>::iterator current_header_;
 };
+
+namespace http { namespace parsers {
+
+template <>
+class body_parser<std::vector<std::string>, std::string>
+{
+public:
+    std::vector<boost::asio::mutable_buffer>
+    parse_body(test_message& msg, boost::asio::const_buffer received, std::size_t remaining)
+    {
+        using namespace boost::asio;
+
+        msg.body.assign(buffer_cast<const char*>(received), buffer_size(received));
+        return std::vector<mutable_buffer>();
+    }
+};
+
+} }
 
 void test_message_parser()
 {
@@ -60,7 +89,7 @@ void test_message_parser()
         http::parsers::message_state<test_message, std::string::const_iterator> test_parser(test_msg);
     
         std::string::const_iterator begin = test_string.begin();
-        test_parser.parse(begin, test_string.end());
+        test_parser.parse_headers(begin, test_string.end());
     }
 
     {
@@ -71,7 +100,7 @@ void test_message_parser()
         std::string::const_iterator end = begin + 1;
         for (; end != test_string.end(); ++end)
         {
-            test_parser.parse(begin, end);
+            test_parser.parse_headers(begin, end);
         }
     }
 
@@ -83,14 +112,14 @@ void test_message_parser()
         std::string::const_iterator end = begin + 2;
         for (; end != test_string.end(); end += 2)
         {
-            test_parser.parse(begin, end);
+            test_parser.parse_headers(begin, end);
         }
     }
 }
 
-test_suite* init_unit_test_suite(int, char*[])
+void init_basic_message_parser_suite(int, char*[])
 {
-  test_suite* test = BOOST_TEST_SUITE("basic_message_parser");
+  boost::unit_test::test_suite* test = BOOST_TEST_SUITE("basic_message_parser");
   test->add(BOOST_TEST_CASE(&test_message_parser));
-  return test;
+  boost::unit_test::framework::master_test_suite().add(test);
 }

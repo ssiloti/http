@@ -7,15 +7,10 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-
 #include <http/parsers/headers.hpp>
-
 #include <boost/test/unit_test.hpp>
-#include <boost/test/included/unit_test_framework.hpp>
-
 #include <algorithm>
 
-using boost::unit_test::test_suite;
 using namespace http;
 
 template <typename Header>
@@ -42,6 +37,31 @@ void test_token_vector()
     BOOST_CHECK(std::find(h.second.begin(), h.second.end(), std::string("token1")) != h.second.end());
     BOOST_CHECK(std::find(h.second.begin(), h.second.end(), std::string("token2")) != h.second.end());
     BOOST_CHECK(std::find(h.second.begin(), h.second.end(), std::string("token3")) != h.second.end());
+}
+
+void test_cache_control()
+{
+    test_token_map<headers::cache_control>();
+}
+
+void test_pragma()
+{
+    test_token_map<headers::pragma>();
+}
+
+void test_connection()
+{
+    test_token_vector<headers::connection>();
+}
+
+void test_trailer()
+{
+    test_token_vector<headers::trailer>();
+}
+
+void test_allow()
+{
+    test_token_vector<headers::allow>();
 }
 
 void test_date()
@@ -235,9 +255,9 @@ void test_content_type()
     BOOST_REQUIRE(parsers::parse_header(ct, testv_pass.begin(), testv_pass.end()));
 }
 
-test_suite* init_unit_test_suite(int, char*[])
+void init_headers_suite(int, char*[])
 {
-    test_suite* test = BOOST_TEST_SUITE("headers");
+    boost::unit_test::test_suite* test = BOOST_TEST_SUITE("headers");
     test->add(BOOST_TEST_CASE(&test_token_map<headers::cache_control>));
     test->add(BOOST_TEST_CASE(&test_token_map<headers::pragma>));
     test->add(BOOST_TEST_CASE(&test_token_vector<headers::connection>));
@@ -258,5 +278,6 @@ test_suite* init_unit_test_suite(int, char*[])
     test->add(BOOST_TEST_CASE(&test_if_match));
     test->add(BOOST_TEST_CASE(&test_content_length));
     test->add(BOOST_TEST_CASE(&test_content_type));
-    return test;
+
+    boost::unit_test::framework::master_test_suite().add(test);
 }
