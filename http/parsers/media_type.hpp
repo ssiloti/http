@@ -47,7 +47,7 @@ struct media_type
 
 } // namespace parsers
 
-media_type& media_type::operator=(const std::string& str)
+inline media_type& media_type::operator=(const std::string& str)
 {
     std::string::const_iterator begin(str.begin());
     if (!boost::spirit::qi::parse(begin, str.end(), parsers::media_type<std::string::const_iterator>(), *this))

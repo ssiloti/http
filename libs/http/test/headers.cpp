@@ -39,31 +39,6 @@ void test_token_vector()
     BOOST_CHECK(std::find(h.second.begin(), h.second.end(), std::string("token3")) != h.second.end());
 }
 
-void test_cache_control()
-{
-    test_token_map<headers::cache_control>();
-}
-
-void test_pragma()
-{
-    test_token_map<headers::pragma>();
-}
-
-void test_connection()
-{
-    test_token_vector<headers::connection>();
-}
-
-void test_trailer()
-{
-    test_token_vector<headers::trailer>();
-}
-
-void test_allow()
-{
-    test_token_vector<headers::allow>();
-}
-
 void test_date()
 {
     headers::date d;

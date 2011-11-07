@@ -27,7 +27,7 @@
 
 namespace http {
 
-std::size_t memcpyv(std::vector<boost::asio::mutable_buffer>& dest, boost::asio::const_buffer src)
+inline std::size_t memcpyv(std::vector<boost::asio::mutable_buffer>& dest, boost::asio::const_buffer src)
 {
     std::vector<boost::asio::mutable_buffer>::iterator begin = dest.begin();
     std::size_t source_bytes = boost::asio::buffer_size(src);

@@ -33,7 +33,7 @@ struct media_type
         : type(type), subtype(subtype)
     {}
 
-    media_type& operator=(const std::string&);
+    inline media_type& operator=(const std::string&);
 
     std::string type, subtype;
     parameters_t parameters;
